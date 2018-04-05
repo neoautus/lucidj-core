@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<project name="lucidj-core" default="deploy-all">
+
+    <import file="configure.xml"/>
+
+    <target name="build-kernel">
+        <subant buildpath="${basedir}/kernel"/>
+    </target>
+
+    <target name="build-felix">
+        <subant buildpath="${basedir}/stage-templates/apache-felix-5.6"/>
+    </target>
+
+    <target name="build-stage">
+        <antcall target="build-felix"/>
+    </target>
+
+    <target name="build-all">
+        <iterate target="build-all"/>
+    </target>
+
+    <target name="deploy-all">
+        <iterate target="build-all"/>
+        <antcall target="build-stage"/>
+    </target>
+
+    <target name="clean">
+        <iterate target="clean"/>
+    </target>
+
+</project>

@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<project name="kernel" default="build-all">
+
+    <import>
+        <fileset dir="${basedir}" includes="configure.xml"/>
+        <fileset dir="${basedir}/.." includes="configure.xml"/>
+    </import>
+
+    <property name="felix.release" value="5.6.10"/>
+
+    <target name="getlibs" depends="configure.getlibs">
+
+        <resolvePath id="felix/framework">
+            <dependency org="org.apache.felix" name="org.apache.felix.framework" rev="${felix.release}" transitive="false"/>
+            <!--dependency org="org.osgi" name="org.osgi.service.log" rev="1.3.0" transitive="false"/-->
+            <dependency org="org.apache.felix" name="org.apache.felix.log" rev="1.0.1" transitive="false"/>
+        </resolvePath>
+
+    </target>
+
+    <target name="build-all" depends="init">
+
+        <echo message="Building bundle."/>
+
+        <!--property name="bootstrap.jar.name" value="bootstrap-${felix.release}.jar"/>
+        <property name="bootstrap.jar.file" value="${basedir}/dist/${bootstrap.jar.name}"/>
+
+        <copy todir="${basedir}/dist" overwrite="true">
+            <mappedresources>
+                <restrict>
+                    <path refid="felix/framework"/>
+                    <name name="**/org.apache.felix.framework-*.jar"/>
+                </restrict>
+                <mergemapper to="${bootstrap.jar.name}"/>
+            </mappedresources>
+        </copy-->
+
+        <!--manifest file="${bootstrap.jar}"/-->
+        <local name="bundle.dist.jar"/>
+        <build.bundle symbolicName="Kernel" version="1.0.0"
+            src="${basedir}/src" bnd="${basedir}/bundle.bnd"
+            outfileProperty="bundle.dist.jar" ipojo="false" defaultPathId="excludeDefault">
+            <classpaths>
+                <path refid="felix/framework"/>
+            </classpaths>
+        </build.bundle>
+
+        <!--jar destfile="${bootstrap.jar.file}" update="true">
+            <zipgroupfileset file="${bundle.dist.jar}"/>
+            <manifest>
+                <attribute name="Main-Class" value="org.lucidj.bootstrap.Main"/>
+            </manifest>
+        </jar-->
+
+        <echo message="Generated: ${bundle.dist.jar}"/>
+
+    </target>
+
+</project>
