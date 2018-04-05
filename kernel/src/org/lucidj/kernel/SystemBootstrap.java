@@ -208,6 +208,7 @@ public class SystemBootstrap implements BundleListener
         fsl.setInitialBundleStartLevel (start_level);
 
         File[] bundle_list = bundle_dir.listFiles();
+
         for (int i = 0; bundle_list != null && i < bundle_list.length; i++)
         {
             String bundle_uri = bundle_list [i].toURI ().toString ();
@@ -219,9 +220,24 @@ public class SystemBootstrap implements BundleListener
                 // TODO: INSTALL FRAGMENTS LAST?
                 if (action_code == ActionCode.ACTION_DEPLOY || action_code == ActionCode.ACTION_INSTALL)
                 {
-                    if ((bnd = context.installBundle (bundle_uri)) == null)
+                    try
                     {
-                        log.error ("Error installing {}", bundle_uri);
+                        if ((bnd = context.installBundle (bundle_uri)) == null)
+                        {
+                            log.error ("Error installing {}", bundle_uri);
+                            continue;
+                        }
+                    }
+                    catch (BundleException e)
+                    {
+                        if (e.getType() == BundleException.DUPLICATE_BUNDLE_ERROR)
+                        {
+                            log.warn ("Bundle already installed: {}", bundle_uri);
+                        }
+                        else
+                        {
+                            log.error ("Exception installing: {}", bundle_uri, e);
+                        }
                         continue;
                     }
                 }
@@ -291,11 +307,18 @@ public class SystemBootstrap implements BundleListener
 
         int active = 0, fragment = 0, resolved = 0, installed = 0;
 
-        for (int i = 0; i < bundle_list.length; i++)
+        for (int i = 0; bundle_list != null && i < bundle_list.length; i++)
         {
             Bundle bnd = context.getBundle (bundle_list [i].toURI ().toString ());
+
+            if (bnd == null)
+            {
+                continue;
+            }
+
             log.info ("[{}] {} [{}] {} {} {}", dirname, bundle_list [i].getName(),
                 bnd.getBundleId(), bnd.getSymbolicName(), bnd.getVersion(), get_state_string (bnd));
+
             switch (bnd.getState ())
             {
                 case Bundle.ACTIVE:
