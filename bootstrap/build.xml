@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<project name="bootstrap" default="build">
+
+    <import>
+        <fileset dir="${basedir}" includes="configure.xml"/>
+        <fileset dir=".." includes="configure.xml"/>
+    </import>
+
+    <target name="build" depends="init">
+
+        <local name="bundle.dist.jar"/>
+        <build.bundle symbolicName="org.lucidj.bootstrap" version="1.0.0"
+            src="${basedir}/src" bnd="${basedir}/bundle.bnd" ipojo="false">
+        </build.bundle>
+
+    </target>
+
+    <target name="build-all">
+        <echo message="Skip"/>
+    </target>
+
+</project>

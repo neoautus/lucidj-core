@@ -1,0 +1,6 @@
+Bundle-Name: Bootstrap
+Bundle-SymbolicName: org.lucidj.bootstrap
+Bundle-Version: 1.0.0
+Bundle-Vendor: NEOautus Ltd
+Bundle-Activator: org.lucidj.bootstrap.BootstrapActivator
+Private-Package: org.lucidj.bootstrap
