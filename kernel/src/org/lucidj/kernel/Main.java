@@ -23,14 +23,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import org.apache.felix.framework.util.Util;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
-import org.osgi.service.log.LogListener;
-import org.osgi.service.log.LogService;
 
 /**
  * <p>
@@ -49,13 +45,9 @@ public class Main
     public static final String BUNDLE_DIR_SWITCH = "-b";
 
     /**
-     * The property name used to specify the felix home directory
-     */
-    public static final String SYSTEM_HOME_PROP = "felix.home";
-    /**
      * The property name used to specify whether the launcher should
      * install a shutdown hook.
-     **/
+    **/
     public static final String SHUTDOWN_HOOK_PROP = "felix.shutdown.hook";
     /**
      * The property name used to specify an URL to the system
@@ -205,12 +197,6 @@ public class Main
     **/
     public static void main(String[] args) throws Exception
     {
-        System.out.println ("    __               _     __    __");
-        System.out.println ("   / /   __  _______(_)___/ /   / /  Powered by");
-        System.out.println ("  / /   / / / / ___/ / __  /_  / /  Apache Felix");
-        System.out.println (" / /___/ /_/ / /__/ / /_/ / /_/ /");
-        System.out.println ("/_____/\\__,_/\\___/_/\\__,_/\\____/");
-
         // Look for bundle directory and/or cache directory.
         // We support at most one argument, which is the bundle
         // cache directory.
@@ -301,45 +287,15 @@ public class Main
             m_fwk = factory.newFramework(configProps);
             // Initialize the framework, but don't start it yet.
             m_fwk.init();
-
-            // Init log services
-            BundleContext fwctx = m_fwk.getBundleContext();
-            KernelLogListener log_listener = new KernelLogListener (fwctx);
-            Dictionary<String, Object> props = new Hashtable<> ();
-            props.put (Constants.SERVICE_RANKING, Integer.MIN_VALUE);
-            ServiceRegistration log_listener_service =
-                    fwctx.registerService(LogListener.class.getName(), log_listener, props);
-
-            System.err.println ("TinyLogListener ServiceRegistration = " + log_listener_service);
-            KernelLogService log_service = new KernelLogService(fwctx);
-            ServiceRegistration log_service_service =
-                    fwctx.registerService(LogService.class.getName(), log_service, props);
-            System.err.println ("TinyLogService ServiceRegistration = " + log_service_service);
-
             // Use the system bundle context to process the auto-deploy
             // and auto-install/auto-start properties.
-            SystemBootstrap bootstrap = new SystemBootstrap (configProps, fwctx, log_service);
-
-            if (!bootstrap.configure ())
-            {
-                System.exit (0);
-            }
-
-            // Process special start level 1 (pre-start)
-            bootstrap.process (1, 1);
-
-            // Handle native Felix configurations
-            AutoProcessor.process(configProps, fwctx);
-
+            EmbedProcessor.process(m_fwk.getBundleContext());
+            AutoProcessor.process(configProps, m_fwk.getBundleContext());
             FrameworkEvent event;
             do
             {
                 // Start the framework.
                 m_fwk.start();
-
-                // Process all other start levels
-                bootstrap.process (2, Integer.MAX_VALUE);
-
                 // Wait for framework to stop to exit the VM.
                 event = m_fwk.waitForStop(0);
             }
