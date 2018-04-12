@@ -1,22 +1,27 @@
 <?xml version="1.0"?>
-<project name="bootstrap" default="build">
+<project name="bootstrap" default="build-module">
 
     <import>
         <fileset dir="${basedir}" includes="configure.xml"/>
         <fileset dir=".." includes="configure.xml"/>
     </import>
 
-    <target name="build" depends="init">
+    <target name="getlibs" depends="configure.getlibs">
+        <resolvePath id="pax-logging-api">
+            <dependency org="org.ops4j.pax.logging" name="pax-logging-api" rev="1.10.1" transitive="false"/>
+        </resolvePath>
+    </target>
+
+    <target name="build-module" depends="init">
 
         <local name="bundle.dist.jar"/>
         <build.bundle symbolicName="org.lucidj.bootstrap" version="1.0.0"
             src="${basedir}/src" bnd="${basedir}/bundle.bnd" ipojo="false">
+            <classpaths>
+                <path refid="pax-logging-api"/>
+            </classpaths>
         </build.bundle>
 
-    </target>
-
-    <target name="build-all">
-        <echo message="Skip"/>
     </target>
 
 </project>

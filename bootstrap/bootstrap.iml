@@ -8,5 +8,14 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="OSGi 5.0.0 (Core, Compendium, Enterprise)" level="project" />
+    <orderEntry type="module-library" scope="PROVIDED">
+      <library name="Pax-Logging-API-1.x">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../cache/lib/core/pax-logging/bundle/pax-logging-api-1.10.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

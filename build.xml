@@ -20,11 +20,12 @@
     </target>
 
     <target name="build-all">
-        <iterate target="build-all"/>
+        <iterate target="build-module"/>
+        <antcall target="build-kernel"/>
     </target>
 
     <target name="deploy-all">
-        <iterate target="build-all"/>
+        <antcall target="build-all"/>
         <antcall target="build-stage"/>
     </target>
 

@@ -18,7 +18,6 @@ package org.lucidj.bootstrap;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -27,6 +26,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.framework.*;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // Scan the $FELIX_HOME/bundle.d dir and process it as follows:
 //
@@ -52,19 +53,26 @@ import org.osgi.framework.wiring.BundleRevision;
 //      25-install-cluster-protocols
 //      30-deploy-cluster
 //
-public class Bootstrap implements BundleListener
+public class Bootstrap implements FrameworkListener, BundleListener
 {
-    static final String file_separator = System.getProperty ("file.separator");
+    private final static Logger log = LoggerFactory.getLogger (Bootstrap.class);
+
+    public static final String AUTO_DEPLOY_DIR_PROPERTY = "felix.auto.deploy.dir";  // From AutoProcessor
+    public static final String AUTO_DEPLOY_DIR_VALUE    = "bundle";                 // From AutoProcessor
+    public static final String SYSTEM_HOME_PROP         = "felix.home";
 
     private BundleContext context;
-    private Map<String, String> config;
+    private Bundle fw_bundle;
+    private FrameworkStartLevel fw_start_level;
     private File bundle_d = null;
 
-    public Bootstrap (Map<String, String> config, BundleContext context)
+    public Bootstrap (BundleContext context)
     {
-        this.config = config;
         this.context = context;
-//        this.log = log;
+
+        // Init framework bundle and framework start level
+        fw_bundle = context.getBundle (0);
+        fw_start_level = fw_bundle.adapt (FrameworkStartLevel.class);
     }
 
     private String get_state_string (Bundle bnd)
@@ -98,9 +106,7 @@ public class Bootstrap implements BundleListener
         final Lock lock = new ReentrantLock();
         final Condition startLevelReachedCondition = lock.newCondition();
 
-        Bundle fwb = context.getBundle ();
-        FrameworkStartLevel fsl = fwb.adapt (FrameworkStartLevel.class);
-        fsl.setStartLevel (startLevel, new FrameworkListener()
+        fw_start_level.setStartLevel (startLevel, new FrameworkListener()
         {
             @Override
             public void frameworkEvent(final FrameworkEvent event)
@@ -140,6 +146,15 @@ public class Bootstrap implements BundleListener
         finally
         {
             lock.unlock();
+        }
+    }
+
+    @Override
+    public void frameworkEvent(FrameworkEvent frameworkEvent)
+    {
+        if (frameworkEvent.getType() == FrameworkEvent.STARTLEVEL_CHANGED)
+        {
+            log.info ("======> NEW START LEVEL = {}", fw_start_level.getStartLevel());
         }
     }
 
@@ -202,9 +217,7 @@ public class Bootstrap implements BundleListener
         }
 
         // Set default start level for the installed bundles
-        Bundle fwb = context.getBundle ();
-        FrameworkStartLevel fsl = fwb.adapt (FrameworkStartLevel.class);
-        fsl.setInitialBundleStartLevel (start_level);
+        fw_start_level.setInitialBundleStartLevel (start_level);
 
         File[] bundle_list = bundle_dir.listFiles();
 
@@ -346,52 +359,42 @@ public class Bootstrap implements BundleListener
         }
 
         log.info ("[{}] Bundle summary: level={} active={} fragment={} resolved={} installed={}",
-            dirname, fsl.getStartLevel(), active, fragment, resolved, installed);
+            dirname, fw_start_level.getStartLevel(), active, fragment, resolved, installed);
     }
 
-    public boolean configure ()
+    public boolean start ()
     {
-        // First we try to get bundle.d directory in the same way Felix does
-        String autoDir = config.get(AutoProcessor.AUTO_DEPLOY_DIR_PROPERTY);
+        // Let's guess first using felix.home if it exists
+        String felix_home_dir = System.getProperty (SYSTEM_HOME_PROP);
 
-        // If specified, felix.auto.deploy.dir needs to exist
-        if (autoDir != null)
+        if (felix_home_dir != null)
         {
-            if (!(bundle_d = new File (autoDir)).exists())
-            {
-                // The user specified a directory, but it doesn't exists.
-                // Don't even try to guess. The missing dir is an error.
-                log.error ("Property '{}' directory not found: {}",
-                        AutoProcessor.AUTO_DEPLOY_DIR_PROPERTY, autoDir);
-                return (false);
-            }
+            // With felix.home, try to use ${felix_home}/bundle.d
+            bundle_d = new File (new File (felix_home_dir), "bundle.d");
         }
-        else
+        else // No felix.home, let's try Felix default
         {
-            // Let's guess first using felix.home if it exists
-            String felix_home_dir = config.get (Main.SYSTEM_HOME_PROP);
-
-            if (felix_home_dir != null)
-            {
-                // With felix.home, try to use ${felix_home}/bundle.d
-                bundle_d = new File (new File (felix_home_dir), "bundle.d");
-            }
-            else // No felix.home, let's try Felix default
-            {
-                bundle_d = new File (AutoProcessor.AUTO_DEPLOY_DIR_VALUE);
-            }
+            bundle_d = new File (AUTO_DEPLOY_DIR_VALUE);
         }
 
-        if (!bundle_d.exists())
+        if (!bundle_d.exists ())
         {
             log.warn ("Deploy dir '{}' not found for bootstrap",
-                AutoProcessor.AUTO_DEPLOY_DIR_PROPERTY);
+                AUTO_DEPLOY_DIR_PROPERTY);
             return (false);
         }
 
-        log.info ("Bootstrap directory: {}", bundle_d.getAbsolutePath());
+        // We are good to go!
+        context.addFrameworkListener (this);
         context.addBundleListener (this);
+        log.info ("Bootstrap directory: {}", bundle_d.getAbsolutePath ());
         return (true);
+    }
+
+    public void stop ()
+    {
+        context.removeBundleListener (this);
+        context.removeFrameworkListener (this);
     }
 
     public void process (int min_start_level, int max_start_level)
@@ -435,7 +438,7 @@ public class Bootstrap implements BundleListener
 
         if (bundleEvent.getType () == BundleEvent.STARTED)
         {
-            log.debug ("Bundle {} is now ACTIVE", bnd);
+            log.info ("Bundle {} is now ACTIVE", bnd);
         }
 
         switch (bundleEvent.getType ())

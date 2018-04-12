@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="kernel" default="build-all">
+<project name="kernel" default="build-kernel">
 
     <import>
         <fileset dir="${basedir}" includes="configure.xml"/>
@@ -65,7 +65,11 @@
 
     </target>
 
-    <target name="build-all" depends="init">
+    <target name="build-module">
+        <echo message="Skip -- kernel have no modules"/>
+    </target>
+
+    <target name="build-kernel" depends="init">
 
         <echo message="Building bundle."/>
 
@@ -94,6 +98,7 @@
                     <path refid="core/pax-logging"/>
                     <path refid="core/pax-mvn"/>
                     <path refid="core/aries-jmx"/>
+                    <fileset file="../bootstrap/dist/*.jar"/><!-- Boostrap module -->
                 </union>
                 <chainedmapper>
                     <flattenmapper/>

@@ -96,6 +96,7 @@
 
         <!-- Copy preloaded bundles -->
         <property name="preload.bundles.dir" value="${stage.dir}/bundle.d"/>
+        <mkdir dir="${preload.bundles.dir}"/>
 
         <!--copy todir="${preload.bundles.dir}/01-deploy-base-system" flatten="true">
             <path refid="felix/base"/>
