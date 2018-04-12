@@ -18,10 +18,6 @@ package org.lucidj.bootstrap;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.osgi.framework.*;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
@@ -53,7 +49,7 @@ import org.slf4j.LoggerFactory;
 //      25-install-cluster-protocols
 //      30-deploy-cluster
 //
-public class Bootstrap implements FrameworkListener, BundleListener
+public class Bootstrap implements FrameworkListener
 {
     private final static Logger log = LoggerFactory.getLogger (Bootstrap.class);
 
@@ -97,65 +93,6 @@ public class Bootstrap implements FrameworkListener, BundleListener
     private boolean is_fragment (Bundle bnd)
     {
         return ((bnd.adapt (BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0);
-    }
-
-    public void setFrameworkStartLevel (final int startLevel)
-    {
-        log.debug ("Setting framework startlevel to {}", startLevel);
-        final AtomicBoolean startLevelReached = new AtomicBoolean(false);
-        final Lock lock = new ReentrantLock();
-        final Condition startLevelReachedCondition = lock.newCondition();
-
-        fw_start_level.setStartLevel (startLevel, new FrameworkListener()
-        {
-            @Override
-            public void frameworkEvent(final FrameworkEvent event)
-            {
-                lock.lock();
-                int eventType = event.getType();
-                if (eventType == FrameworkEvent.STARTLEVEL_CHANGED
-                    || eventType == FrameworkEvent.ERROR)
-                {
-                    if (eventType == FrameworkEvent.ERROR)
-                    {
-                        log.error ("Setting framework startlevel to {} finished with error", startLevel, event.getThrowable());
-                    }
-                    else
-                    {
-                        log.debug ("Setting framework startlevel to {} finished with success", startLevel);
-                    }
-                    startLevelReached.set (true);
-                    startLevelReachedCondition.signal();
-                }
-                lock.unlock();
-            }
-        });
-
-        try
-        {
-            lock.lock();
-            while (!startLevelReached.get ())
-            {
-                startLevelReachedCondition.await ();
-            }
-        }
-        catch (InterruptedException e)
-        {
-            log.error ("Startlevel reaching wait interrupted", e);
-        }
-        finally
-        {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public void frameworkEvent(FrameworkEvent frameworkEvent)
-    {
-        if (frameworkEvent.getType() == FrameworkEvent.STARTLEVEL_CHANGED)
-        {
-            log.info ("======> NEW START LEVEL = {}", fw_start_level.getStartLevel());
-        }
     }
 
     enum ActionCode
@@ -310,7 +247,8 @@ public class Bootstrap implements FrameworkListener, BundleListener
 
         if (start_level > 1)
         {
-            setFrameworkStartLevel (start_level);
+            // Just set and let the framework bring the level up
+            fw_start_level.setStartLevel (start_level, (FrameworkListener[])null);
         }
 
         //---------
@@ -386,78 +324,66 @@ public class Bootstrap implements FrameworkListener, BundleListener
 
         // We are good to go!
         context.addFrameworkListener (this);
-        context.addBundleListener (this);
         log.info ("Bootstrap directory: {}", bundle_d.getAbsolutePath ());
         return (true);
     }
 
     public void stop ()
     {
-        context.removeBundleListener (this);
         context.removeFrameworkListener (this);
     }
 
-    public void process (int min_start_level, int max_start_level)
+    @Override // FrameworkListener
+    public void frameworkEvent (FrameworkEvent frameworkEvent)
     {
-        File[] files = bundle_d.listFiles ();
-
-        if (files == null)
+        if (frameworkEvent.getType () == FrameworkEvent.STARTED
+            || frameworkEvent.getType () == FrameworkEvent.STARTLEVEL_CHANGED)
         {
-            return;
-        }
+            int start_level = fw_start_level.getStartLevel ();
 
-        Arrays.sort (files);
+            log.info ("New framework start level: {}", start_level);
 
-        for (int i = 0; i < files.length; i++)
-        {
-            if (files [i].isDirectory()
-                && !files [i].getName ().endsWith (".jar"))
+            //------------------------------------------------------------------
+            // Locate next bundle.d start level directory > current start level
+            //------------------------------------------------------------------
+
+            File[] files = bundle_d.listFiles ();
+
+            if (files == null)
             {
-                int dir_start_level = get_dir_start_level (files [i]);
+                return;
+            }
 
-                if (dir_start_level >= min_start_level && dir_start_level <= max_start_level)
+            Arrays.sort (files);
+            File target_level_dir = null;
+
+            for (File file: files)
+            {
+                // Locate the first directory whose level is above current start level
+                if (file.isDirectory() && !file.getName ().endsWith (".jar")
+                        && get_dir_start_level (file) > start_level)
                 {
-                    try
-                    {
-                        process_dir (files [i]);
-                    }
-                    catch (Throwable e)
-                    {
-                        log.error ("Exception running System Bootstrap", e);
-                    }
+                    target_level_dir = file;
+                    break;
+                }
+            }
+
+            //--------------------------------------
+            // Process the found bundle.d directory
+            //--------------------------------------
+
+            if (target_level_dir != null)
+            {
+                try
+                {
+                    process_dir (target_level_dir);
+                }
+                catch (Throwable e)
+                {
+                    log.error ("Exception running System Bootstrap", e);
                 }
             }
         }
-    }
-
-    @Override
-    public void bundleChanged (BundleEvent bundleEvent)
-    {
-        Bundle bnd = bundleEvent.getBundle ();
-        String msg;
-
-        if (bundleEvent.getType () == BundleEvent.STARTED)
-        {
-            log.info ("Bundle {} is now ACTIVE", bnd);
-        }
-
-        switch (bundleEvent.getType ())
-        {
-            case BundleEvent.INSTALLED:       msg = "INSTALLED";        break;
-            case BundleEvent.LAZY_ACTIVATION: msg = "LAZY_ACTIVATION";  break;
-            case BundleEvent.RESOLVED:
-                msg = is_fragment(bnd)? "FRAGMENT": "RESOLVED";         break;
-            case BundleEvent.STARTED:         msg = "STARTED";          break;
-            case BundleEvent.STARTING:        msg = "STARTING";         break;
-            case BundleEvent.STOPPED:         msg = "STOPPED";          break;
-            case BundleEvent.STOPPING:        msg = "STOPPING";         break;
-            case BundleEvent.UNINSTALLED:     msg = "UNINSTALLED";      break;
-            case BundleEvent.UNRESOLVED:      msg = "UNRESOLVED";       break;
-            case BundleEvent.UPDATED:         msg = "UPDATED";          break;
-            default:                          msg = "unknown";          break;
-        }
-
-        log.debug ("bundleChanged: {} type={} state={}", bnd, msg, get_state_string (bnd));
     }
 }
 
