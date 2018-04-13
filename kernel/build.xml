@@ -26,6 +26,11 @@
             <dependency org="org.apache.felix" name="org.apache.felix.gogo.runtime" rev="1.0.10" transitive="false"/>
         </resolvePath>
 
+        <resolvePath id="kernel/jna">
+            <dependency org="net.java.dev.jna" name="jna-platform" rev="4.5.1" transitive="false"/>
+            <dependency org="net.java.dev.jna" name="jna" rev="4.5.1" transitive="false"/>
+        </resolvePath>
+
         <resolvePath id="kernel/pax-logging">
             <!-- Main -->
             <dependency org="org.ops4j.pax.logging" name="pax-logging-api" rev="1.10.1" transitive="false"/>
@@ -90,6 +95,7 @@
             <mappedresources>
                 <union>
                     <path refid="kernel/felix-base"/>
+                    <path refid="kernel/jna"/>
                     <path refid="kernel/felix-configadmin"/>
                     <path refid="kernel/felix-ds"/>
                     <restrict><!-- ipojo -->
