@@ -55,7 +55,7 @@ public class Bootstrap implements FrameworkListener
 
     public static final String AUTO_DEPLOY_DIR_PROPERTY = "felix.auto.deploy.dir";  // From AutoProcessor
     public static final String AUTO_DEPLOY_DIR_VALUE    = "bundle";                 // From AutoProcessor
-    public static final String SYSTEM_HOME_PROP         = "felix.home";
+    public static final String SYSTEM_HOME_PROP         = "system.home";
 
     private BundleContext context;
     private Bundle fw_bundle;

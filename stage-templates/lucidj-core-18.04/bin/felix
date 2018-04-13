@@ -51,6 +51,5 @@ then
 fi
 
 cd "$FELIX_HOME"
-exec "$java" -cp "$CLASSPATH" -Dfelix.home="$FELIX_HOME" -Dfelix.config.properties="file:$FELIX_HOME/conf/config.properties" -Djava.util.logging.config.file="$FELIX_HOME/conf/java.util.logging.properties" $java_args @MAINCLASS@ "$@"
+exec "$java" -cp "$CLASSPATH" -Dsystem.home="$FELIX_HOME" -Dsystem.config="$FELIX_HOME/conf" -Dfelix.config.properties="file:$FELIX_HOME/conf/config.properties" -Djava.util.logging.config.file="$FELIX_HOME/conf/java.util.logging.properties" $java_args @MAINCLASS@ "$@"
 exit 1
-

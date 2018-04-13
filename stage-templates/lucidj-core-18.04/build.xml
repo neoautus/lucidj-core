@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="apache-felix" default="build-runtime">
+<project name="lucidj-core" default="build-runtime">
 
     <import>
         <fileset dir="${basedir}" includes="configure.xml"/>
@@ -185,7 +185,7 @@
             <path refid="core/felix-webconsole"/>
         </copy>
 
-        <touch file="${stage.dir}/log/felix.log" mkdirs="true"/>
+        <touch file="${stage.dir}/log/system.log" mkdirs="true"/>
 
         <!-- Copy extra config files -->
         <copy todir="${stage.dir}/conf">
