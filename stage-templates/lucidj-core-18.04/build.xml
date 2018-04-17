@@ -192,6 +192,9 @@
             <fileset dir="${basedir}/conf" includes="**/*"/>
         </copy>
 
+        <!-- Create data/ directory -->
+        <mkdir dir="${stage.dir}/data"/>
+
         <!-- Remove docs dir -->
         <delete dir="${stage.dir}/doc"/>
 
