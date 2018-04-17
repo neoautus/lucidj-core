@@ -24,14 +24,43 @@ import org.osgi.service.log.LogService;
 
 public class TinyLog
 {
+    public final static String[] LOG_LEVELS =
+    {
+        "OFF", "ERROR", "WARN", "INFO", "DEBUG"
+    };
+
     private LogService log_service = null;
-    private LogService log_service_stdout = new StdoutLogService (LogService.LOG_DEBUG);
+    private LogService log_service_stdout;
     private BundleContext context;
     private String logger_name;
 
     public TinyLog (String logger_name)
     {
+        // Tinylog level can be set using environment variable TINYLOG={ OFF|ERROR|WARN|INFO|DEBUG }
+        log_service_stdout = new StdoutLogService (getConfiguredLogLevel (logger_name));
         this.logger_name = logger_name;
+    }
+
+    public static int getConfiguredLogLevel (String logger_name)
+    {
+        String tinylog_env_default = System.getenv ("TINYLOG");
+        String tinylog_default = System.getProperty ("tinylog",
+            tinylog_env_default == null? LOG_LEVELS[LogService.LOG_INFO]: tinylog_env_default);
+        String tinylog_property = System.getProperty ("tinylog_" + logger_name, tinylog_default).toUpperCase();
+
+        if (logger_name == null)
+        {
+            return (LogService.LOG_INFO);
+        }
+
+        for (int level = 0; level < LOG_LEVELS.length; level++)
+        {
+            if (LOG_LEVELS[level].equals(tinylog_property))
+            {
+                return (level);
+            }
+        }
+        return (LogService.LOG_INFO);
     }
 
     public TinyLog (Class logger_clazz)
@@ -155,19 +184,19 @@ public class TinyLog
         @Override // LogService
         public void log (int i, String s)
         {
-            log(null, i, s, null);
+            log (null, i, s, null);
         }
 
         @Override // LogService
         public void log (int i, String s, Throwable throwable)
         {
-            log(null, i, s, throwable);
+            log (null, i, s, throwable);
         }
 
         @Override // LogService
         public void log (ServiceReference serviceReference, int i, String s)
         {
-            log(serviceReference, i, s, null);
+            log (serviceReference, i, s, null);
         }
 
         @Override // LogService
@@ -177,13 +206,9 @@ public class TinyLog
             {
                 return;
             }
-            String[] levels =
-            {
-                "", "ERROR", "WARN", "INFO", "DEBUG"
-            };
-            String sr = (serviceReference == null) ? ": " : serviceReference.toString() + ": ";
-            String th = (throwable == null) ? "" : " - " + throwable.toString();
-            System.out.println(levels[i] + sr + s + th);
+            String sr = (serviceReference == null) ? ": " : serviceReference.toString () + ": ";
+            String th = (throwable == null) ? "" : " - " + throwable.toString ();
+            System.out.println ("[" + logger_name + "] " + TinyLog.LOG_LEVELS[i] + sr + s + th);
         }
     }
 }
