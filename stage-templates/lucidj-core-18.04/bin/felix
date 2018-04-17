@@ -17,15 +17,9 @@
 
 THIS_FILE=`which "$0" 2>/dev/null`
 [ $? -gt 0 -a -f "$0" ] && THIS_FILE="$0"
-CP="$(pwd)/$THIS_FILE"
-DIR=$(cd "$(dirname "$THIS_FILE")"; pwd)
-FELIX_HOME=$(cd "$DIR/.."; pwd)
+JAR="$(pwd)/$THIS_FILE"
 
-# Cleanup paths for Cygwin
 case "$platform" in
-CYGWIN*)
-	CP=`cygpath --windows --mixed --path "$CP"`
-	;;
 Darwin)
 	if [ -e /System/Library/Frameworks/JavaVM.framework ]
 	then
@@ -41,15 +35,11 @@ Darwin)
 	;;
 esac
 
-CLASSPATH="$CP"
-export CLASSPATH
-
 java=java
 if [ -n "$JAVA_HOME" ]
 then
 	java="$JAVA_HOME/bin/java"
 fi
 
-cd "$FELIX_HOME"
-exec "$java" -cp "$CLASSPATH" -Dsystem.home="$FELIX_HOME" -Dsystem.config="$FELIX_HOME/conf" -Dfelix.config.properties="file:$FELIX_HOME/conf/config.properties" -Djava.util.logging.config.file="$FELIX_HOME/conf/java.util.logging.properties" $java_args @MAINCLASS@ "$@"
+exec "$java" -jar "$JAR" "$@"
 exit 1

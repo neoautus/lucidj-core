@@ -220,6 +220,9 @@ public class Main
             }
         }
 
+        // Self-discovery home and directory structure
+        Layouts.processLayouts ();
+
         if ((args.length > 3) || (expectBundleDir && bundleDir == null))
         {
             System.out.println("Usage: [-b <bundle-deploy-dir>] [<bundle-cache-dir>]");
