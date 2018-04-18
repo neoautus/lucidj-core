@@ -102,6 +102,31 @@ public class Layouts
         return (layout_props);
     }
 
+    public static void set_filtered_properties (Properties properties, String filter_prefix)
+    {
+        // Filter the properties by prefix and set them as system properties, removing the prefix
+        for (Enumeration keys = properties.propertyNames (); keys.hasMoreElements (); )
+        {
+            String map_key = (String)keys.nextElement ();
+
+            if (map_key.startsWith (filter_prefix))
+            {
+                String key = map_key.substring (filter_prefix.length ());
+                String value = properties.getProperty (map_key);
+
+                if (!System.getProperties().containsKey(key))
+                {
+                    log.debug ("Setting: {} -> {}", key, value);
+                    System.setProperty (key, value);
+                }
+                else
+                {
+                    log.debug ("Already set: {} -> {}", key, System.getProperty (key));
+                }
+            }
+        }
+    }
+
     public static boolean processLayouts ()
     {
         URI jar_uri;
@@ -124,6 +149,7 @@ public class Layouts
 
         PropertiesEx layout_map = new PropertiesEx (load_layout_properties (basedir_path));
         layout_map.setProperty ("basedir", basedir_path.toUri ().toString ());
+        layout_map.setProperty ("basepath", basedir_path.toString ());
 
         String layouts = layout_map.getProperty ("layouts");
 
@@ -176,24 +202,14 @@ public class Layouts
                     System.setProperty (key, found_props.get (key));
                 }
 
-                String export_prefix = "export.";
-
                 // Set all exported properties
-                for (Enumeration keys = layout_map.propertyNames (); keys.hasMoreElements (); )
-                {
-                    String map_key = (String)keys.nextElement ();
-
-                    if (map_key.startsWith (export_prefix))
-                    {
-                        String key = map_key.substring (export_prefix.length ());
-                        String value = layout_map.getProperty (map_key);
-                        log.debug ("Setting {} -> {}", key, value);
-                        System.setProperty (key, value);
-                    }
-                }
+                set_filtered_properties (layout_map, "export.");
                 return (true);
             }
         }
+
+        // No layout was found, set all fallback properties
+        set_filtered_properties (layout_map, "fallback.");
         return (false);
     }
 }
