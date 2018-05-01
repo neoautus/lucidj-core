@@ -35,6 +35,7 @@
             <!-- Main -->
             <dependency org="org.ops4j.pax.logging" name="pax-logging-api" rev="1.10.1" transitive="false"/>
             <dependency org="org.ops4j.pax.logging" name="pax-logging-service" rev="1.10.1" transitive="false"/>
+            <!--dependency org="org.osgi" name="org.osgi.service.log" rev="1.3.0" transitive="false"/-->
             <!--dependency org="org.ops4j.pax.logging" name="pax-logging-log4j2" rev="1.10.1" transitive="false"/-->
         </resolvePath>
 
@@ -68,6 +69,19 @@
             <dependency org="org.apache.aries" name="org.apache.aries.util" rev="1.1.1" transitive="false"/>
             <dependency org="org.everit.osgi.jmx" name="org.everit.osgi.jmx.activator" rev="1.0.0" transitive="false"/>
         </resolvePath>
+
+        <property name="artdeploy.dir" value="${cache.dir}/${ant.project.name}/artdeploy"/>
+        <property name="artdeploy.release" value="1.1.0"/>
+        <mkdir dir="${artdeploy.dir}"/>
+        <get dest="${artdeploy.dir}"
+             src="https://github.com/neoautus/lucidj-artifactdeployer/releases/download/${artdeploy.release}/api.lucidj.artdeployer-${artdeploy.release}.jar"
+             skipexisting="true"/>
+        <get dest="${artdeploy.dir}"
+             src="https://github.com/neoautus/lucidj-artifactdeployer/releases/download/${artdeploy.release}/org.lucidj.artdeployer-${artdeploy.release}.jar"
+             skipexisting="true"/>
+        <path id="kernel/artdeploy">
+            <fileset dir="${artdeploy.dir}" includes="**/*-${artdeploy.release}.jar"/>
+        </path>
 
     </target>
 
@@ -106,6 +120,7 @@
                     <path refid="kernel/pax-mvn"/>
                     <path refid="kernel/aries-jmx"/>
                     <fileset file="../bootstrap/dist/*.jar"/><!-- Boostrap module -->
+                    <path refid="kernel/artdeploy"/>
                 </union>
                 <chainedmapper>
                     <flattenmapper/>
