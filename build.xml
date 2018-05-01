@@ -7,16 +7,8 @@
         <subant buildpath="${basedir}/kernel"/>
     </target>
 
-    <target name="build-core">
-        <subant buildpath="${basedir}/stage-templates/lucidj-core-18.04"/>
-    </target>
-
-    <target name="build-felix">
-        <subant buildpath="${basedir}/stage-templates/apache-felix-5.6"/>
-    </target>
-
     <target name="build-stage">
-        <antcall target="build-core"/>
+        <subant buildpath="${basedir}/stage-templates/lucidj-core-18.04"/>
     </target>
 
     <target name="build-all">
