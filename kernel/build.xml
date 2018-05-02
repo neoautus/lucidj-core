@@ -70,17 +70,15 @@
             <dependency org="org.everit.osgi.jmx" name="org.everit.osgi.jmx.activator" rev="1.0.0" transitive="false"/>
         </resolvePath>
 
-        <property name="artdeploy.dir" value="${cache.dir}/${ant.project.name}/artdeploy"/>
-        <property name="artdeploy.release" value="1.1.0"/>
-        <mkdir dir="${artdeploy.dir}"/>
-        <get dest="${artdeploy.dir}"
-             src="https://github.com/neoautus/lucidj-artifactdeployer/releases/download/${artdeploy.release}/api.lucidj.artdeployer-${artdeploy.release}.jar"
-             skipexisting="true"/>
-        <get dest="${artdeploy.dir}"
-             src="https://github.com/neoautus/lucidj-artifactdeployer/releases/download/${artdeploy.release}/org.lucidj.artdeployer-${artdeploy.release}.jar"
-             skipexisting="true"/>
-        <path id="kernel/artdeploy">
-            <fileset dir="${artdeploy.dir}" includes="**/*-${artdeploy.release}.jar"/>
+        <getDependency group="project-libs"
+            org="neoautus/lucidj-stddef" name="org.lucidj.api.stddef" rev="1.0.1"/>
+        <getDependency group="project-libs"
+            org="neoautus/lucidj-artifactdeployer" name="org.lucidj.api.artdeployer" rev="1.2.0"/>
+        <getDependency group="project-libs"
+            org="neoautus/lucidj-artifactdeployer" name="org.lucidj.artdeployer" rev="1.2.0"/>
+
+        <path id="project-libs">
+            <fileset dir="${libcache.dir}" includes="project-libs/**/*.jar"/>
         </path>
 
     </target>
@@ -94,7 +92,7 @@
         <echo message="Building bundle."/>
 
         <local name="bundle.dist.jar"/>
-        <build.bundle symbolicName="Kernel" version="1.0.0"
+        <build.bundle symbolicName="Kernel" version="1.1.0"
             src="${basedir}/src" bnd="${basedir}/bundle.bnd"
             outfileProperty="bundle.dist.jar" ipojo="false" defaultPathId="excludeDefault">
             <classpaths>
@@ -120,7 +118,7 @@
                     <path refid="kernel/pax-mvn"/>
                     <path refid="kernel/aries-jmx"/>
                     <fileset file="../bootstrap/dist/*.jar"/><!-- Boostrap module -->
-                    <path refid="kernel/artdeploy"/>
+                    <path refid="project-libs"/>
                 </union>
                 <chainedmapper>
                     <flattenmapper/>

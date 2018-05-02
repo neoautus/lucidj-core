@@ -1,4 +1,19 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright 2018 NEOautus Ltd. (http://neoautus.com)
+
+   Licensed under the Apache License, Version 2.0 (the "License"); you may not
+   use this file except in compliance with the License. You may obtain a copy of
+   the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+   License for the specific language governing permissions and limitations under
+   the License.
+-->
 <project name="configure" xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <property name="docs.dir" value="${basedir}/docs"/>
@@ -35,22 +50,22 @@
         description="Retrieve default libraries from maven repositories.">
 
         <resolvePath id="default/osgi">
-            <dependency org="org.osgi" name="org.osgi.core" rev="5.0.0"/>
-            <dependency org="org.osgi" name="org.osgi.compendium" rev="5.0.0"/>
-            <dependency org="org.osgi" name="org.osgi.enterprise" rev="5.0.0"/>
+            <ivy:dependency org="org.osgi" name="org.osgi.core" rev="5.0.0"/>
+            <ivy:dependency org="org.osgi" name="org.osgi.compendium" rev="5.0.0"/>
+            <ivy:dependency org="org.osgi" name="org.osgi.enterprise" rev="5.0.0"/>
         </resolvePath>
 
         <property name="ipojo.rev" value="1.12.1"/>
         <resolvePath id="default/ipojo">
-            <dependency org="org.apache.felix" name="org.apache.felix.ipojo" rev="${ipojo.rev}" transitive="false"/>
-            <dependency org="org.apache.felix" name="org.apache.felix.ipojo.api" rev="${ipojo.rev}" transitive="false"/>
-            <dependency org="org.apache.felix" name="org.apache.felix.ipojo.annotations" rev="${ipojo.rev}" transitive="false"/>
+            <ivy:dependency org="org.apache.felix" name="org.apache.felix.ipojo" rev="${ipojo.rev}" transitive="false"/>
+            <ivy:dependency org="org.apache.felix" name="org.apache.felix.ipojo.api" rev="${ipojo.rev}" transitive="false"/>
+            <ivy:dependency org="org.apache.felix" name="org.apache.felix.ipojo.annotations" rev="${ipojo.rev}" transitive="false"/>
             <!--dependency org="org.apache.felix" name="org.apache.felix.ipojo.handler.eventadmin" rev="1.8.0"/-->
-            <dependency org="org.apache.felix" name="org.apache.felix.ipojo.handler.extender" rev="1.4.0" transitive="false"/>
+            <ivy:dependency org="org.apache.felix" name="org.apache.felix.ipojo.handler.extender" rev="1.4.0" transitive="false"/>
         </resolvePath>
 
-        <resolvePath id="default/javaee-api">
-            <dependency org="javax" name="javaee-api" rev="7.0" transitive="false"/>
+        <resolvePath id="default/slf4j-api">
+            <ivy:dependency org="org.slf4j" name="slf4j-api" rev="1.7.25" transitive="false"/>
         </resolvePath>
 
     </target>
@@ -73,7 +88,30 @@
         <touch file="${setup.ok.file}" verbose="false"/>
     </target>
 
-    <!-- Fetch dependencies and place jars on cache/lib/[dependency-group] -->
+    <!-- Fetch dependencies from Github and place jars on cache/lib/[group] -->
+    <macrodef name="getDependency">
+        <attribute name="group"/>
+        <attribute name="org"/>
+        <attribute name="name"/>
+        <attribute name="rev"/>
+        <attribute name="type" default="jar"/>
+        <sequential>
+            <local name="dest.file"/>
+            <property name="dest.file" value="${libcache.dir}/@{group}/@{name}-@{rev}.@{type}"/>
+            <if><not><available file="${dest.file}"/></not>
+                <then>
+                    <mkdir dir="${libcache.dir}/@{group}"/>
+                    <get dest="${libcache.dir}/@{group}/@{name}.tmp"
+                         src="https://github.com/@{org}/releases/download/@{rev}/@{name}-@{rev}.jar"
+                         skipexisting="false"/>
+                    <move file="${libcache.dir}/@{group}/@{name}.tmp"
+                          tofile="${dest.file}"/>
+                </then>
+            </if>
+        </sequential>
+    </macrodef>
+
+    <!-- Fetch dependencies and place jars on cache/lib/[id] -->
     <macrodef name="resolvePath">
         <attribute name="id"/>
         <attribute name="type" default="jar,bundle"/>
