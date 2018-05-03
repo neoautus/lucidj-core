@@ -167,7 +167,9 @@
             </filterchain>
         </copy>
         <concat destfile="${fancy-launcher}" append="yes" binary="true" force="yes">
-            <file name="${basedir}/../../kernel/dist/Kernel-1.0.0.jar"/>
+            <fileset dir="${basedir}/../../kernel/dist/">
+                <include name="Kernel-*.jar"/>
+            </fileset>
         </concat>
         <chmod file="${fancy-launcher}" perm="a+x"/>
 
