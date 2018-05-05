@@ -25,7 +25,7 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// Scan the $FELIX_HOME/bundle.d dir and process it as follows:
+// Scan the $FELIX_HOME/boot.d dir and process it as follows:
 //
 // 1) Parse every directory using the format:
 //
@@ -53,14 +53,17 @@ public class Bootstrap implements FrameworkListener
 {
     private final static Logger log = LoggerFactory.getLogger (Bootstrap.class);
 
-    public static final String AUTO_DEPLOY_DIR_PROPERTY = "felix.auto.deploy.dir";  // From AutoProcessor
-    public static final String AUTO_DEPLOY_DIR_VALUE    = "bundle";                 // From AutoProcessor
-    public static final String SYSTEM_HOME_PROP         = "system.home";
+    public static final String AUTO_DEPLOY_DIR_PROPERTY  = "felix.auto.deploy.dir";       // From AutoProcessor
+    public static final String AUTO_DEPLOY_DIR_VALUE     = "bundle";                      // From AutoProcessor
+    public static final String FINAL_STARTLEVEL_PROPERTY = "bootstrap.final.startlevel";
+    public static final int    FINAL_STARTLEVEL_VALUE    = 100;
+    public static final String SYSTEM_HOME_PROP          = "system.home";
 
     private BundleContext context;
     private Bundle fw_bundle;
     private FrameworkStartLevel fw_start_level;
     private File bundle_d = null;
+    private int final_startlevel = FINAL_STARTLEVEL_VALUE;
 
     public Bootstrap (BundleContext context)
     {
@@ -109,14 +112,11 @@ public class Bootstrap implements FrameworkListener
         ACTION_UNINSTALL
     };
 
-    private int get_dir_start_level (File dir)
+    private int get_int_start_level (String probable_int)
     {
-        String dirname = dir.getName ();
-        int dash = dirname.indexOf ('-');
-
         try
         {
-            return (Integer.parseInt (dash == -1? dirname: dirname.substring (0, dash)));
+            return ((probable_int == null)? -1: Integer.parseInt (probable_int));
         }
         catch (NumberFormatException ignore)
         {
@@ -124,11 +124,26 @@ public class Bootstrap implements FrameworkListener
         }
     }
 
+    private int get_dir_start_level (File dir)
+    {
+        String dirname = dir.getName ();
+        int dash = dirname.indexOf ('-');
+
+        return (get_int_start_level (dash == -1? dirname: dirname.substring (0, dash)));
+    }
+
     private void process_dir (File bundle_dir)
     {
         String dirname = bundle_dir.getName ();
         String[] params = dirname.split ("-", 3);
         int start_level = Integer.parseInt (params [0]);
+
+        if (start_level == -1)
+        {
+            log.warn ("Start level '{}' invalid -- ignoring {}", params [0], bundle_dir.getName ());
+            return;
+        }
+
         String action = params.length > 1? params [1].toLowerCase(): "deploy";
         String description = params.length > 2? params [2]: "";
 
@@ -149,7 +164,7 @@ public class Bootstrap implements FrameworkListener
 
         if (action_code == ActionCode.ACTION_UNKNOWN)
         {
-            log.warn ("Action '{}' is unknown -- ignoring {}", action, bundle_dir.getName());
+            log.warn ("Action '{}' is unknown -- ignoring {}", action, bundle_dir.getName ());
             return;
         }
 
@@ -307,8 +322,8 @@ public class Bootstrap implements FrameworkListener
 
         if (felix_home_dir != null)
         {
-            // With felix.home, try to use ${felix_home}/bundle.d
-            bundle_d = new File (new File (felix_home_dir), "bundle.d");
+            // With felix.home, try to use ${felix_home}/boot.d
+            bundle_d = new File (new File (felix_home_dir), "boot.d");
         }
         else // No felix.home, let's try Felix default
         {
@@ -320,6 +335,17 @@ public class Bootstrap implements FrameworkListener
             log.warn ("Deploy dir '{}' not found for bootstrap",
                 AUTO_DEPLOY_DIR_PROPERTY);
             return (false);
+        }
+
+        String final_startlevel_prop = System.getProperty (FINAL_STARTLEVEL_PROPERTY);
+
+        if (final_startlevel_prop != null)
+        {
+            if ((final_startlevel = get_int_start_level (final_startlevel_prop)) == -1)
+            {
+                // An invalid number just leaves it as default
+                final_startlevel = FINAL_STARTLEVEL_VALUE;
+            }
         }
 
         // We are good to go!
@@ -341,30 +367,41 @@ public class Bootstrap implements FrameworkListener
         {
             int start_level = fw_start_level.getStartLevel ();
 
-            log.info ("New framework start level: {}", start_level);
+            if (start_level >= final_startlevel)
+            {
+                // TODO: REMOVE FRAMEWORK LISTENER?
+                log.info ("Bootstrap finished with start level {} / {}", final_startlevel, start_level);
+                return;
+            }
+
+            log.info ("Framework start level: {}", start_level);
 
             //------------------------------------------------------------------
             // Locate next bundle.d start level directory > current start level
             //------------------------------------------------------------------
 
             File[] files = bundle_d.listFiles ();
-
-            if (files == null)
-            {
-                return;
-            }
-
-            Arrays.sort (files);
             File target_level_dir = null;
 
-            for (File file: files)
+            if (files != null)
             {
-                // Locate the first directory whose level is above current start level
-                if (file.isDirectory() && !file.getName ().endsWith (".jar")
-                        && get_dir_start_level (file) > start_level)
+                // TODO: CHANGE SOMEDAY TO NUMERIC ORDERING
+                // TODO: MERGE EQUAL START-LEVELS
+                Arrays.sort (files);
+
+                for (File file: files)
                 {
-                    target_level_dir = file;
-                    break;
+                    int dir_startlevel = get_dir_start_level (file);
+
+                    // Locate the first directory whose level is above current start level
+                    if (file.isDirectory() && !file.getName ().endsWith (".jar")
+                        && dir_startlevel != -1
+                        && get_dir_start_level (file) > start_level
+                        && dir_startlevel <= final_startlevel)
+                    {
+                        target_level_dir = file;
+                        break;
+                    }
                 }
             }
 
@@ -382,6 +419,11 @@ public class Bootstrap implements FrameworkListener
                 {
                     log.error ("Exception running System Bootstrap", e);
                 }
+            }
+            else
+            {
+                // Nothing more to do, set final startlevel
+                fw_start_level.setStartLevel (final_startlevel, (FrameworkListener [])null);
             }
         }
     }
