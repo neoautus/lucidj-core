@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 //      25-install-cluster-protocols
 //      30-deploy-cluster
 //
-public class Bootstrap implements FrameworkListener
+public class Bootstrap implements FrameworkListener, BundleListener
 {
     private final static Logger log = LoggerFactory.getLogger (Bootstrap.class);
 
@@ -96,6 +96,16 @@ public class Bootstrap implements FrameworkListener
     private boolean is_fragment (Bundle bnd)
     {
         return ((bnd.adapt (BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0);
+    }
+
+    @Override // BundleListener
+    public void bundleChanged(BundleEvent bundleEvent)
+    {
+        if (bundleEvent.getType() == BundleEvent.UPDATED)
+        {
+            log.warn ((bundleEvent.getOrigin() != null)? "Bundle {} updated (origin {})": "Bundle {} updated",
+                bundleEvent.getBundle (), bundleEvent.getOrigin());
+        }
     }
 
     enum ActionCode
@@ -350,6 +360,7 @@ public class Bootstrap implements FrameworkListener
 
         // We are good to go!
         context.addFrameworkListener (this);
+        context.addBundleListener (this);
         log.info ("Bootstrap directory: {}", bundle_d.getAbsolutePath ());
         return (true);
     }
@@ -369,7 +380,11 @@ public class Bootstrap implements FrameworkListener
 
             if (start_level >= final_startlevel)
             {
-                // TODO: REMOVE FRAMEWORK LISTENER?
+                // No need to track framework anymore
+                stop ();
+
+                // Set default start level for the next bundles installed
+                fw_start_level.setInitialBundleStartLevel (final_startlevel);
                 log.info ("Bootstrap finished with start level {} / {}", final_startlevel, start_level);
                 return;
             }
