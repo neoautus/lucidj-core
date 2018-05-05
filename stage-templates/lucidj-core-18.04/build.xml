@@ -174,17 +174,23 @@
         <chmod file="${fancy-launcher}" perm="a+x"/>
 
         <!-- Copy preloaded bundles -->
-        <property name="preload.bundles.dir" value="${stage.dir}/bundle.d"/>
+        <property name="preload.bundles.dir" value="${stage.dir}/boot.d"/>
         <mkdir dir="${preload.bundles.dir}"/>
 
-        <copy todir="${preload.bundles.dir}/10-deploy-http" flatten="true">
+        <copy todir="${preload.bundles.dir}/10-deploy-jetty" flatten="true">
             <path refid="core/jetty"/>
+        </copy>
+
+        <copy todir="${preload.bundles.dir}/11-deploy-http" flatten="true">
             <path refid="core/pax-web"/>
         </copy>
 
         <copy todir="${preload.bundles.dir}/50-deploy-admintools" flatten="true">
-            <path refid="core/jolokia"/>
             <path refid="core/felix-webconsole"/>
+        </copy>
+
+        <copy todir="${preload.bundles.dir}/90-deploy-extras" flatten="true">
+            <path refid="core/jolokia"/>
         </copy>
 
         <touch file="${stage.dir}/log/system.log" mkdirs="true"/>
