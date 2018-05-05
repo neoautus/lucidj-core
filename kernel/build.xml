@@ -12,7 +12,7 @@
 
         <resolvePath id="kernel/felix-framework">
             <dependency org="org.apache.felix" name="org.apache.felix.framework" rev="${felix.release}" transitive="false"/>
-            <!--dependency org="org.osgi" name="org.osgi.service.log" rev="1.3.0" transitive="false"/-->
+            <dependency org="org.osgi" name="org.osgi.service.log" rev="1.3.0" transitive="false"/>
             <!--dependency org="org.apache.felix" name="org.apache.felix.log" rev="1.0.1" transitive="false"/-->
         </resolvePath>
 
@@ -73,9 +73,9 @@
         <getDependency group="project-libs"
             org="neoautus/lucidj-stddef" name="org.lucidj.api.stddef" rev="1.0.1"/>
         <getDependency group="project-libs"
-            org="neoautus/lucidj-artifactdeployer" name="org.lucidj.api.artdeployer" rev="1.2.0"/>
+            org="neoautus/lucidj-artifactdeployer" name="org.lucidj.api.artdeployer" rev="1.3.0"/>
         <getDependency group="project-libs"
-            org="neoautus/lucidj-artifactdeployer" name="org.lucidj.artdeployer" rev="1.2.0"/>
+            org="neoautus/lucidj-artifactdeployer" name="org.lucidj.artdeployer" rev="1.3.0"/>
 
         <path id="project-libs">
             <fileset dir="${libcache.dir}" includes="project-libs/**/*.jar"/>
