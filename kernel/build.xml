@@ -56,6 +56,13 @@
             <dependency org="org.apache.felix" name="org.apache.felix.scr" rev="2.0.14" transitive="false"/>
         </resolvePath>
 
+        <resolvePath id="kernel/aries-blueprint">
+            <dependency org="org.apache.aries.blueprint" name="org.apache.aries.blueprint.core" rev="1.9.0" transitive="false"/>
+            <dependency org="org.apache.aries.blueprint" name="org.apache.aries.blueprint.cm" rev="1.2.0" transitive="false"/>
+            <dependency org="org.apache.aries.blueprint" name="org.apache.aries.blueprint.api" rev="1.0.0" transitive="false"/>
+            <dependency org="org.apache.aries.proxy" name="org.apache.aries.proxy.api" rev="1.1.0" transitive="false"/>
+        </resolvePath>
+
         <property name="ipojo.rev" value="1.12.1"/>
         <resolvePath id="kernel/felix-ipojo">
             <dependency org="org.apache.felix" name="org.apache.felix.ipojo" rev="${ipojo.rev}" transitive="false"/>
@@ -122,6 +129,7 @@
                     <path refid="kernel/jna"/>
                     <path refid="kernel/felix-configadmin"/>
                     <path refid="kernel/felix-ds"/>
+                    <path refid="kernel/aries-blueprint"/>
                     <restrict><!-- ipojo -->
                         <path refid="kernel/felix-ipojo"/>
                         <not><name name="**/org.apache.felix.ipojo.annotations-*.jar"/></not>
