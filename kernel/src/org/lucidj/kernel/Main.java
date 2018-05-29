@@ -223,6 +223,8 @@ public class Main
         // Self-discovery home and directory structure
         Layouts.processLayouts ();
 
+        // TODO: HANDLE PROPER START WITH/WITHOUT EMBEDDED SHELL (--nointeractive)
+
         if ((args.length > 3) || (expectBundleDir && bundleDir == null))
         {
             System.out.println("Usage: [-b <bundle-deploy-dir>] [<bundle-cache-dir>]");

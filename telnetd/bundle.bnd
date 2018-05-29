@@ -1,0 +1,6 @@
+Bundle-Name: LucidJ Telnet Daemon for Gogo
+Bundle-SymbolicName: org.lucidj.telnetd
+Bundle-Version: 1.0.0
+Bundle-Vendor: NEOautus Ltd
+Bundle-Activator: org.lucidj.telnetd.TelnetdActivator
+Private-Package: org.lucidj.telnetd
