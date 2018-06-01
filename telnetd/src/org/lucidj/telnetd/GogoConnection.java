@@ -26,6 +26,7 @@ import org.jline.terminal.TerminalBuilder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -123,8 +124,8 @@ class GogoConnection extends Connection implements ConnectionListener, Shell.Con
 
     private void update_terminal_size ()
     {
-        terminal.setSize (new Size(getConnectionData ().getTerminalColumns (),
-                                   getConnectionData ().getTerminalRows ()));
+        terminal.setSize (new Size (getConnectionData ().getTerminalColumns (),
+                                    getConnectionData ().getTerminalRows ()));
     }
 
     @Override // ConnectionListener
@@ -195,6 +196,10 @@ class GogoConnection extends Connection implements ConnectionListener, Shell.Con
                             return (-1);
                         }
                         throw (e);
+                    }
+                    catch (EOFException e)
+                    {
+                        return (-1);
                     }
                 }
 
