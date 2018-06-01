@@ -70,7 +70,10 @@ public class Telnetd implements Runnable
             }
         };
 
-        // Start things
+        // Start ConnectionManager housekeeping
+        connection_manager.start ();
+
+        // Start listening inbound connections
         accept_thread = new Thread (this);
         accept_thread.setName (context.getBundle().getSymbolicName() + "-srv-" + DEFAULT_LISTEN_PORT);
         accept_thread.start ();
@@ -111,6 +114,9 @@ public class Telnetd implements Runnable
         {
             log.warn ("Exception closing listener socket", e);
         }
+
+        // Stop housekeeping
+        connection_manager.stop ();
 
         // Stop listener thread, wait at most 10 secs for clean stop
         try
