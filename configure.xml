@@ -14,14 +14,28 @@
    License for the specific language governing permissions and limitations under
    the License.
 -->
-<project name="configure" xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="configure"
+     xmlns:ivy="antlib:org.apache.ivy.ant"
+     xmlns:if="ant:if"
+     xmlns:unless="ant:unless">
 
+    <fail>Error:
+
+        ***** This project should NOT be run as root *****
+
+        <condition>
+            <equals arg1="root" arg2="${user.name}"/>
+        </condition>
+    </fail>
+
+    <property environment="env"/>
     <property name="docs.dir" value="${basedir}/docs"/>
     <property name="dist.dir" value="${basedir}/dist"/>
     <property name="build.dir" value="${basedir}/build"/>
 
     <dirname property="configure.dir" file="${ant.file.configure}"/>
     <property name="cache.dir" value="${configure.dir}/cache"/>
+    <property name="artifacts.dir" value="${configure.dir}/build/artifacts"/>
     <property name="libcache.dir" value="${cache.dir}/lib"/>
     <property name="tmp.dir" value="${cache.dir}/tmp"/>
 
@@ -266,14 +280,27 @@
     <macrodef name="deploy">
         <attribute name="file"/>
         <sequential>
-            <if><isset property="stage.available.flag"/>
+
+            <!-- 1) Top priority: env var DEPLOY_DIR set -->
+            <condition property="deploy.dir" value="${env.DEPLOY_DIR}">
+                <isset property="env.DEPLOY_DIR"/>
+            </condition>
+
+            <!-- 2) Then: explicit deploy.properties set -->
+            <property file="${stage.dir}/deploy.properties" if:set="stage.available.flag"/>
+
+            <!-- 3) Default: Only stage available -->
+            <condition property="deploy.dir" value="${stage.dir}/deploy">
+                <isset property="stage.available.flag"/>
+            </condition>
+
+            <if><isset property="deploy.dir"/>
                 <then>
-                    <property file="${stage.dir}/deploy.properties"/>
-                    <property name="deploy.dir" value="${stage.dir}/deploy"/>
-                    <copy file="@{file}" todir="${deploy.dir}"
-                        overwrite="true" taskname="deploy"/>
+                    <copy file="@{file}" todir="${deploy.dir}" overwrite="true" taskname="deploy"/>
                 </then>
                 <else>
+
+                    <!-- 4) If none of above apply, try to deploy to an active server -->
                     <if><http url="http://localhost:8181/~localsvc/deploy"/>
                         <then>
                             <echo taskname="deploy" message="Remote deploy: @{file}"/>
@@ -286,6 +313,15 @@
                     </if>
                 </else>
             </if>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="artifact">
+        <attribute name="file"/>
+        <attribute name="group" default="default"/>
+        <sequential>
+            <mkdir dir="${artifacts.dir}/@{group}" taskname="artifact"/>
+            <copy file="@{file}" todir="${artifacts.dir}/@{group}" overwrite="true" taskname="artifact"/>
         </sequential>
     </macrodef>
 
@@ -328,6 +364,7 @@
         <attribute name="ipojo" default="true"/>
         <attribute name="outfileProperty" default="bundle.temp.jar"/>
         <attribute name="defaultPathId" default="default.path"/>
+        <attribute name="embeddedClasses" default="emptyFileset"/>
         <element name="classpaths" optional="yes"/>
         <element name="privateClasspath" optional="yes"/>
         <sequential>
@@ -336,7 +373,7 @@
             <local name="module.classes.dir"/>
             <property name="module.classes.dir" value="${module.build.dir}/classes"/>
             <local name="module.dist.dir"/>
-            <property name="module.dist.dir" value="${dist.dir}"/>
+            <property name="module.dist.dir" value="${dist.dir}/@{symbolicName}"/>
             <local name="module.dist.jar"/>
             <property name="module.dist.jar" value="${module.dist.dir}/@{symbolicName}-@{version}.jar"/>
             <local name="bundle.temp.jar"/>
@@ -349,8 +386,11 @@
             <!-- Embed private libraries/classpath -->
             <!-- ================================= -->
 
+            <!-- We use to default embeddedClasses=emptyFileset -->
+            <fileset id="emptyFileset" dir="@{src}" includes="---*---"/>
+
             <copy todir="${module.build.dir}/private" overwrite="true" flatten="true">
-                <fileset dir="@{src}" includes="-*"/><!-- just satisfy copy if no privateClasspath -->
+                <fileset refid="emptyFileset"/><!-- just satisfy copy if no privateClasspath -->
                 <privateClasspath/>
             </copy>
 
@@ -360,11 +400,17 @@
                 </fileset>
             </path>
 
+            <!-- So we can use defaultPathId=excludeDefault -->
             <path id="excludeDefault"/>
 
             <!-- ================= -->
             <!-- Javac as usual... -->
             <!-- ================= -->
+
+            <!-- Embed foreign classes if needed -->
+            <copy todir="${module.classes.dir}">
+                <fileset refid="@{embeddedClasses}"/>
+            </copy>
 
             <path id="build.bundle.path">
                 <pathelement path="${module.classes.dir}"/>
@@ -447,10 +493,12 @@
             </if>
 
             <!-- Append bundle.inc to bundle.bnd, if it exists -->
-            <if><available file="@{src}/../bundle.inc"/>
+            <local name="bnd.inc.file"/>
+            <property name="bnd.inc.file" value="${basedir}/@{src}/../bundle.inc"/>
+            <if><available file="${bnd.inc.file}"/>
                 <then>
-                    <concat destfile="${bnd.file}" append="true">
-                        <file name="@{src}/../bundle.inc"/>
+                    <concat destfile="${bnd.file}" append="true" fixlastline="true">
+                        <file name="${bnd.inc.file}"/>
                     </concat>
                 </then>
             </if>
@@ -498,16 +546,18 @@
         <attribute name="deploy" default="false"/>
         <attribute name="exports" default="void"/><!-- TODO: Make an 'auto' which auto-exports all -->
         <attribute name="outfileProperty" default="module.temp.jar"/>
+        <attribute name="embeddedClasses" default="emptyFileset"/>
         <element name="classpath" optional="yes"/>
         <sequential>
             <local name="bnd.file"/>
-            <condition property="bnd.file" value="@{module.dir}/bundle.bnd" else="auto">
-                <available file="@{module.dir}/bundle.bnd"/>
+            <condition property="bnd.file" value="@{dir}/bundle.bnd" else="auto">
+                <available file="@{dir}/bundle.bnd"/>
             </condition>
 
             <local name="module.temp.jar"/>
             <build.bundle bnd="${bnd.file}" src="@{dir}/src" exports="@{exports}" version="@{version}"
-                symbolicName="@{symbolicName}" outfileProperty="@{outfileProperty}">
+                symbolicName="@{symbolicName}" outfileProperty="@{outfileProperty}" ipojo="@{ipojo}"
+                embeddedClasses="@{embeddedClasses}">
                 <classpaths>
                     <classpath/>
                 </classpaths>
@@ -522,6 +572,51 @@
                     <deploy file="${@{outfileProperty}}"/>
                 </then>
             </if>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="build.classic.jar">
+        <attribute name="src"/>
+        <attribute name="name" default="@{src}"/>
+        <attribute name="version" default="none"/>
+        <attribute name="outfileProperty" default="classic.temp.jar"/>
+        <element name="manifests" optional="yes"/>
+        <element name="classpaths" optional="yes"/>
+        <element name="addjar" optional="yes"/>
+        <sequential>
+            <local name="jar.name"/>
+            <condition property="jar.name" value="@{name}" else="@{name}-@{version}">
+                <equals arg1="@{version}" arg2="none"/>
+            </condition>
+
+            <local name="classes.dir"/>
+            <property name="classes.dir" value="${build.dir}/${jar.name}"/>
+            <delete dir="${classes.dir}" quiet="true"/>
+            <mkdir dir="${classes.dir}"/>
+
+            <javac srcdir="@{src}" destdir="${classes.dir}"
+                   debug="${javac.debug}" debuglevel="${javac.debuglevel}" deprecation="${javac.deprecation}"
+                   source="${javac.source}" target="${javac.target}" bootclasspath="${javac.bootclasspath}"
+                   includeantruntime="false">
+                <compilerarg line="${javac.optional}"/>
+                <classpath>
+                    <classpaths/>
+                </classpath>
+            </javac>
+
+            <local name="dist.jar"/>
+            <property name="dist.jar" value="${dist.dir}/@{name}/${jar.name}.jar"/>
+            <local name="classic.temp.jar"/>
+            <property name="@{outfileProperty}" value="${dist.jar}"/>
+            <delete file="${dist.jar}"/>
+            <jar destfile="${dist.jar}">
+                <addjar/>
+                <fileset dir="${classes.dir}" includes="**/*"/>
+                <manifest>
+                    <!-- Some jars actually are not meant to be bundles! -->
+                    <attribute name="Disclaimer" value="  |\      _,,,--,,_        +----------------------------+              /,`.-'`'   ._  \-;;,_    |  This jar is meant to be   |       Zzzz  |,4-  ) )_   .;.(  `'-'   |  classic, not OSGi bundle  |            '---''(_/._)-'(_\_)        +----------------------------+"/><manifests/>
+                </manifest>
+            </jar>
         </sequential>
     </macrodef>
 
