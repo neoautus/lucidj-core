@@ -45,11 +45,14 @@
             <dependency org="net.java.dev.jna" name="jna" rev="4.5.1" transitive="false"/>
         </resolvePath>
 
+        <resolvePath id="kernel/osgi-log">
+            <dependency org="org.osgi" name="org.osgi.service.log" rev="1.3.0" transitive="false"/>
+        </resolvePath>
+
         <resolvePath id="kernel/pax-logging">
             <!-- Main -->
             <dependency org="org.ops4j.pax.logging" name="pax-logging-api" rev="1.10.1" transitive="false"/>
             <dependency org="org.ops4j.pax.logging" name="pax-logging-service" rev="1.10.1" transitive="false"/>
-            <dependency org="org.osgi" name="org.osgi.service.log" rev="1.3.0" transitive="false"/>
         </resolvePath>
 
         <resolvePath id="kernel/felix-ds">
@@ -128,7 +131,7 @@
             outfileProperty="bundle.dist.jar" ipojo="false" defaultPathId="excludeDefault">
             <classpaths>
                 <path refid="kernel/felix-framework"/>
-                <path refid="kernel/pax-logging"/>
+                <path refid="kernel/osgi-log"/>
                 <path refid="project-embedded"/>
             </classpaths>
         </build.bundle>
@@ -147,6 +150,7 @@
                         <path refid="kernel/felix-ipojo"/>
                         <not><name name="**/org.apache.felix.ipojo.annotations-*.jar"/></not>
                     </restrict><!-- /ipojo -->
+                    <path refid="kernel/osgi-log"/>
                     <path refid="kernel/pax-logging"/>
                     <path refid="kernel/pax-mvn"/>
                     <path refid="kernel/aries-jmx"/>
