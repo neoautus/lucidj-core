@@ -17,5 +17,15 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module-library" scope="PROVIDED">
+      <library name="Embedded Libraries">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/../cache/lib/project-embedded" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/../cache/lib/project-embedded" recursive="false" />
+      </library>
+    </orderEntry>
   </component>
 </module>

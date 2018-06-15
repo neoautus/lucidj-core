@@ -96,9 +96,20 @@
             org="neoautus/lucidj-artifactdeployer" name="org.lucidj.api.artdeployer" rev="1.3.0"/>
         <getDependency group="project-libs"
             org="neoautus/lucidj-artifactdeployer" name="org.lucidj.artdeployer" rev="1.3.0"/>
+        <getDependency group="project-libs"
+            org="neoautus/lucidj-admind" name="org.lucidj.admind" rev="1.0.0"/>
+        <getDependency group="project-libs"
+            org="neoautus/lucidj-admind" name="org.lucidj.api.admind" rev="1.0.0"/>
 
         <path id="project-libs">
             <fileset dir="${libcache.dir}" includes="project-libs/**/*.jar"/>
+        </path>
+
+        <getDependency group="project-embedded"
+            org="neoautus/lucidj-admind" name="lucidj-adminutil" rev="1.0.0"/>
+
+        <path id="project-embedded">
+            <fileset dir="${libcache.dir}" includes="project-embedded/**/*.jar"/>
         </path>
 
     </target>
@@ -118,6 +129,7 @@
             <classpaths>
                 <path refid="kernel/felix-framework"/>
                 <path refid="kernel/pax-logging"/>
+                <path refid="project-embedded"/>
             </classpaths>
         </build.bundle>
 

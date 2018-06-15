@@ -2,7 +2,7 @@ Bundle-Name: LucidJ Felix Kernel
 Bundle-SymbolicName: org.lucidj.kernel
 Bundle-Version: 1.1.0
 Bundle-Vendor: NEOautus Ltd
-Private-Package: org.lucidj.kernel
+Private-Package: org.lucidj.kernel;org.lucidj.ext.admind
 Export-Package: org.osgi.*;org.apache.felix.framework.*;org.apache.felix.resolver.*
 Main-Class: org.lucidj.kernel.Main
 Import-Package: !javax.security.auth.x500,!org.apache.felix.framework.util,!org.osgi.framework,!org.osgi.framework.launch,!org.osgi.framework.wiring,!org.osgi.service.log,!org.osgi.service.startlevel

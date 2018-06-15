@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import org.apache.felix.framework.util.Util;
+import org.lucidj.ext.admind.AdmindUtil;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.launch.Framework;
@@ -283,6 +284,17 @@ public class Main
                     }
                 }
             });
+        }
+
+        try
+        {
+            // Create and init AdminD directory and setup shutdown hook to cleanup
+            AdmindUtil.setupAdmindDir (true);
+        }
+        catch (IOException ex)
+        {
+            // TODO: ALSO LOG THIS
+            System.err.println ("Warning: Could not setup AdminD directory: " + ex);
         }
 
         try
