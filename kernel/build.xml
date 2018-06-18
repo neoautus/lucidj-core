@@ -154,8 +154,7 @@
                     <path refid="kernel/pax-logging"/>
                     <path refid="kernel/pax-mvn"/>
                     <path refid="kernel/aries-jmx"/>
-                    <fileset file="../bootstrap/dist/*.jar"/><!-- Boostrap module -->
-                    <fileset file="../telnetd/dist/*.jar"/><!-- TelnetD module -->
+                    <fileset file="${artifacts.dir}/kmodules/*.jar"/><!-- Boostrap, TelnedD modules -->
                     <path refid="project-libs"/>
                 </union>
                 <chainedmapper>

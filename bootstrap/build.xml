@@ -16,11 +16,14 @@
 
         <local name="bundle.dist.jar"/>
         <build.bundle symbolicName="org.lucidj.bootstrap" version="1.0.0"
-            src="${basedir}/src" bnd="${basedir}/bundle.bnd" ipojo="false">
+            src="${basedir}/src" bnd="${basedir}/bundle.bnd" ipojo="false"
+            outfileProperty="bundle.dist.jar">
             <classpaths>
                 <path refid="pax-logging-api"/>
             </classpaths>
         </build.bundle>
+
+        <artifact file="${bundle.dist.jar}" group="kmodules"/>
 
     </target>
 
