@@ -116,7 +116,7 @@
                 <then>
                     <mkdir dir="${libcache.dir}/@{group}"/>
                     <get dest="${libcache.dir}/@{group}/@{name}.tmp"
-                         src="https://github.com/@{org}/releases/download/@{rev}/@{name}-@{rev}.jar"
+                         src="https://github.com/@{org}/releases/download/@{rev}/@{name}-@{rev}.@{type}"
                          skipexisting="false"/>
                     <move file="${libcache.dir}/@{group}/@{name}.tmp"
                           tofile="${dest.file}"/>
