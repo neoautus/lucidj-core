@@ -126,7 +126,7 @@
         <echo message="Building bundle."/>
 
         <local name="bundle.dist.jar"/>
-        <build.bundle symbolicName="Kernel" version="1.1.0"
+        <build.bundle symbolicName="lucidj-kernel" version="1.1.0"
             src="${basedir}/src" bnd="${basedir}/bundle.bnd"
             outfileProperty="bundle.dist.jar" ipojo="false" defaultPathId="excludeDefault">
             <classpaths>
@@ -165,7 +165,7 @@
             </mappedresources>
         </jar>
 
-        <echo message="Generated: ${bundle.dist.jar}"/>
+        <artifact file="${bundle.dist.jar}" group="kernel"/>
 
     </target>
 

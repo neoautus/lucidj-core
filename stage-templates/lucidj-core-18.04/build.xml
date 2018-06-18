@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="lucidj-core" default="build-runtime">
+<project name="lucidj-core" default="build-stage">
 
     <import>
         <fileset dir="${basedir}" includes="configure.xml"/>
@@ -130,9 +130,12 @@
             <!-- None??? -->
         </resolvePath>
 
+        <getDependency group="project-embedded"
+            org="neoautus/lucidj-ladmin" name="lucidj-ladmin" rev="1.0-rc1" type="zip"/>
+
     </target>
 
-    <target name="build-runtime" depends="init">
+    <target name="build-stage" depends="init">
 
         <!--
             Installs a LucidJ Core into stage.
@@ -154,24 +157,15 @@
             <fileset dir="${stage.dir}" includes="**/*"/>
         </chmod>
 
-        <!-- Create a fancy launcher which embeds the Jar within the script and "Works on Mac"(TM) :) -->
-        <property name="fancy-launcher" value="${stage.dir}/bin/felix"/>
-        <echo message="Creating ${fancy-launcher}"/>
-        <copy file="${basedir}/bin/felix" overwrite="true"
-              tofile="${fancy-launcher}" >
-            <filterchain>
-                <replacetokens >
-                    <token key="MAINCLASS" value="${main.class}"/>
-                </replacetokens>
-                <fixcrlf eol="lf" eof="remove" fixlast="true"/>
-            </filterchain>
+        <!-- Unzip LAdmin -->
+        <unzip src="${libcache.dir}/project-embedded/lucidj-ladmin-1.0-rc1.zip" dest="${stage.dir}/bin">
+            <cutdirsmapper dirs="1"/>
+        </unzip>
+
+        <!-- Copy the Kernel -->
+        <copy todir="${stage.dir}/bin">
+            <fileset dir="${artifacts.dir}/kernel" includes="*"/>
         </copy>
-        <concat destfile="${fancy-launcher}" append="yes" binary="true" force="yes">
-            <fileset dir="${basedir}/../../kernel/dist/">
-                <include name="Kernel-*.jar"/>
-            </fileset>
-        </concat>
-        <chmod file="${fancy-launcher}" perm="a+x"/>
 
         <!-- Copy preloaded bundles -->
         <property name="preload.bundles.dir" value="${stage.dir}/boot.d"/>
@@ -213,6 +207,7 @@
                 <exclude name="**/*.exe"/>
                 <exclude name="**/*.bat"/>
                 <exclude name="**/*.jar"/>
+                <exclude name="**/*.png"/>
             </fileset>
         </chmod>
 
