@@ -576,10 +576,10 @@
     </macrodef>
 
     <macrodef name="build.classic.jar">
-        <attribute name="src"/>
+        <attribute name="src" default="${basedir}/src"/>
         <attribute name="name" default="@{src}"/>
         <attribute name="version" default="none"/>
-        <attribute name="outfileProperty" default="classic.temp.jar"/>
+        <attribute name="outfileProperty" default="_classic.temp.jar"/>
         <element name="manifests" optional="yes"/>
         <element name="classpaths" optional="yes"/>
         <element name="addjar" optional="yes"/>
@@ -604,12 +604,12 @@
                 </classpath>
             </javac>
 
-            <local name="dist.jar"/>
-            <property name="dist.jar" value="${dist.dir}/@{name}/${jar.name}.jar"/>
-            <local name="classic.temp.jar"/>
-            <property name="@{outfileProperty}" value="${dist.jar}"/>
-            <delete file="${dist.jar}"/>
-            <jar destfile="${dist.jar}">
+            <local name="_dist.jar"/>
+            <property name="_dist.jar" value="${dist.dir}/@{name}/${jar.name}.jar"/>
+            <local name="_classic.temp.jar"/>
+            <property name="@{outfileProperty}" value="${_dist.jar}"/>
+            <delete file="${_dist.jar}"/>
+            <jar destfile="${_dist.jar}">
                 <addjar/>
                 <fileset dir="${classes.dir}" includes="**/*"/>
                 <manifest>
