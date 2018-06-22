@@ -131,7 +131,7 @@
         </resolvePath>
 
         <getDependency group="project-embedded"
-            org="neoautus/lucidj-ladmin" name="lucidj-ladmin" rev="1.0-rc1" type="zip"/>
+            org="org.lucidj.ladmin" name="lucidj-ladmin" rev="1.0-rc2" type="zip"/>
 
     </target>
 
@@ -158,7 +158,8 @@
         </chmod>
 
         <!-- Unzip LAdmin -->
-        <unzip src="${libcache.dir}/project-embedded/lucidj-ladmin-1.0-rc1.zip" dest="${stage.dir}/bin">
+        <unzip dest="${stage.dir}/bin">
+            <fileset dir="${libcache.dir}" includes="project-embedded/lucidj-ladmin-*.zip"/>
             <cutdirsmapper dirs="1"/>
         </unzip>
 
