@@ -22,23 +22,42 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class TinyLog
 {
     public final static String[] LOG_LEVELS =
     {
+        // These log level strings mirrors the OSGi log level values
+        // (i.e. ERROR = 1, etc). So this array MUST NOT be changed.
         "OFF", "ERROR", "WARN", "INFO", "DEBUG"
     };
 
     private LogService log_service = null;
-    private LogService log_service_stdout;
+    private LogService log_service_builtin;
     private BundleContext context;
     private String logger_name;
 
-    public TinyLog (String logger_name)
+    public TinyLog ()
     {
         // Tinylog level can be set using environment variable TINYLOG={ OFF|ERROR|WARN|INFO|DEBUG }
-        log_service_stdout = new StdoutLogService (getConfiguredLogLevel (logger_name));
+        log_service_builtin = new BuiltinLogService (getConfiguredLogLevel (logger_name));
+    }
+
+    public TinyLog (String logger_name)
+    {
+        this ();
         this.logger_name = logger_name;
+    }
+
+    public TinyLog (Class logger_clazz)
+    {
+        this (logger_clazz.getSimpleName ());
     }
 
     public static int getConfiguredLogLevel (String logger_name)
@@ -61,11 +80,6 @@ public class TinyLog
             }
         }
         return (LogService.LOG_INFO);
-    }
-
-    public TinyLog (Class logger_clazz)
-    {
-        this (logger_clazz.getSimpleName());
     }
 
     private String conv_str (Object obj)
@@ -131,7 +145,7 @@ public class TinyLog
             }
         }
         // If we don't have any service available, fall back to stdout logging
-        return (log_service == null? log_service_stdout: log_service);
+        return (log_service == null? log_service_builtin: log_service);
     }
 
     private void write_log (int level, String msg, Object... args)
@@ -141,7 +155,7 @@ public class TinyLog
             msg = msg.substring (0, pos) + conv_str (args [i]) + msg.substring (pos + 2);
         }
 
-        // Let's assume it's always and the end of the list
+        // Let's assume Throwable is always at the end of the list
         if (args.length > 0 && args [args.length - 1] instanceof Throwable)
         {
             get_log_service().log (level, msg, (Throwable)args [args.length - 1]);
@@ -172,11 +186,24 @@ public class TinyLog
         write_log (LogService.LOG_ERROR, msg, args);
     }
 
-    public class StdoutLogService implements LogService
+    public void log (ServiceReference serviceReference, int i, String s, Throwable throwable)
     {
-        private int log_level;
+        get_log_service ().log (serviceReference, i, s, throwable);
+    }
 
-        public StdoutLogService (int log_level)
+    public PrintStream newLoggingStream (OutputStream parent_stream, int log_level)
+    {
+        return (new PrintStream (new LoggingOutputStream (parent_stream, log_level)));
+    }
+
+    public class BuiltinLogService implements LogService
+    {
+        private String log_file = System.getProperty ("system.log.file", "system.log");
+        private SimpleDateFormat timestamp_format_info = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss ");
+        private int log_level;
+        private volatile OutputStream log_stream;
+
+        public BuiltinLogService (int log_level)
         {
             this.log_level = log_level;
         }
@@ -200,15 +227,132 @@ public class TinyLog
         }
 
         @Override // LogService
-        public void log (ServiceReference serviceReference, int i, String s, Throwable throwable)
+        public synchronized void log (ServiceReference serviceReference, int i, String s, Throwable throwable)
         {
             if (i > log_level)
             {
                 return;
             }
-            String sr = (serviceReference == null) ? ": " : serviceReference.toString () + ": ";
+
+            if (log_stream == null)
+            {
+                try
+                {
+                    log_stream = new FileOutputStream (log_file, true);
+                }
+                catch (Exception e)
+                {
+                    // TODO: LOG TO QUARANTINE
+                }
+            }
+
+            if (log_stream == null)
+            {
+                // Keep account using op counters
+                return;
+            }
+
+            String timestamp = timestamp_format_info.format (new Date ());
+            String sr = (serviceReference == null) ? "" : serviceReference.toString () + ": ";
             String th = (throwable == null) ? "" : " - " + throwable.toString ();
-            System.out.println ("[" + logger_name + "] " + TinyLog.LOG_LEVELS[i] + sr + s + th);
+            String logger = (logger_name == null)? "": "[" + logger_name + "] ";
+            String logdata = timestamp + TinyLog.LOG_LEVELS[i] + "  " + logger + sr + s + th + "\n";
+
+            try
+            {
+                log_stream.write (logdata.getBytes ());
+            }
+            catch (IOException e)
+            {
+                // TODO: LOG TO QUARANTINE
+
+                if (log_stream != null)
+                {
+                    try
+                    {
+                        log_stream.close ();
+                    }
+                    catch (IOException close_silently) {};
+
+                    log_stream = null;
+                }
+            }
+        }
+    }
+
+    class LoggingOutputStream extends OutputStream
+    {
+        private byte[] line = new byte [8192];
+        private int line_ptr = 0;
+        private OutputStream shadow_stream;
+        private int log_level = LogService.LOG_INFO;
+
+        public LoggingOutputStream (OutputStream shadow_stream, int log_level)
+        {
+            super ();
+            this.shadow_stream = shadow_stream;
+            this.log_level = log_level;
+        }
+
+        @Override // OutputStream
+        public void close ()
+            throws IOException
+        {
+            shadow_stream.close ();
+            super.close();
+        }
+
+        @Override // OutputStream
+        public void flush ()
+            throws IOException
+        {
+            shadow_stream.flush ();
+        }
+
+        private void inferring_log (int level, String message)
+        {
+            // If the message have the intended log level backed in,
+            // we will try to get it and erase the log level marker.
+            for (int i = 1; i < LOG_LEVELS.length; i++)
+            {
+                String level_str = "] " + LOG_LEVELS [i] + " ";
+
+                if (message.contains (level_str))
+                {
+                    // We discovered the actual level of the message
+                    level = i;
+
+                    // Erase the level string, since it will added later
+                    message = message.replace (level_str, "] ");
+                    break;
+                }
+            }
+
+            // Log the analysed message
+            log (null, level, message, null);
+        }
+
+        @Override // OutputStream
+        public void write (int b)
+            throws IOException
+        {
+            // TODO: MAKE THIS UTF-8 COMPLIANT
+            if (b == '\n' || line_ptr == line.length)
+            {
+                if (line_ptr > 0) // Do not log empty lines
+                {
+                    inferring_log (log_level, new String (line, 0, line_ptr));
+                }
+                line_ptr = 0;
+            }
+            else if (b == 9 && line_ptr < line.length - 8) // Tab
+            {
+                for (int i = 0; i < 8; i++, line [line_ptr++] = ' ');
+            }
+            else if (b >= ' ') // No ctrl chars
+            {
+                line [line_ptr++] = (byte)b;
+            }
         }
     }
 }

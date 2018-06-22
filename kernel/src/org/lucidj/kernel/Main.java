@@ -28,6 +28,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
+import org.osgi.service.log.LogService;
 
 /**
  * <p>
@@ -302,8 +303,16 @@ public class Main
             // Create an instance of the framework.
             FrameworkFactory factory = getFrameworkFactory();
             m_fwk = factory.newFramework(configProps);
+
             // Initialize the framework, but don't start it yet.
             m_fwk.init();
+
+            // Setup TinyLog on stdout and stderr
+            TinyLog log = new TinyLog ();
+            System.setOut (log.newLoggingStream (System.out, LogService.LOG_INFO));
+            System.setErr (log.newLoggingStream (System.err, LogService.LOG_ERROR));
+            System.out.println ("Server booting on " + new Date ());
+
             // Use the system bundle context to process the auto-deploy
             // and auto-install/auto-start properties.
             EmbedProcessor.process(m_fwk.getBundleContext());
@@ -313,12 +322,16 @@ public class Main
             {
                 // Start the framework.
                 m_fwk.start();
+
+                // TODO: SHOW WHICH THREADS ARE DELAYING THE SHUTDOWN (ONCE EVERY SECOND)
                 // Wait for framework to stop to exit the VM.
                 event = m_fwk.waitForStop(0);
             }
             // If the framework was updated, then restart it.
             while (event.getType() == FrameworkEvent.STOPPED_UPDATE);
+
             // Otherwise, exit.
+            System.out.println ("Server stopped on " + new Date ());
             System.exit(0);
         }
         catch (Exception ex)
