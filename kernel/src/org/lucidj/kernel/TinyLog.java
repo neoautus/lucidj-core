@@ -282,7 +282,7 @@ public class TinyLog
 
     class LoggingOutputStream extends OutputStream
     {
-        private byte[] line = new byte [8192];
+        private byte[] line = new byte [8192];      // TODO: FIX CONCURRENT THREAD WRITE INTERLEAVING
         private int line_ptr = 0;
         private OutputStream shadow_stream;
         private int log_level = LogService.LOG_INFO;
