@@ -56,6 +56,18 @@ public class EmbedProcessor
         URL embedded_bundle_url = Main.class.getResource (EMBEDDED_DEPLOY_DIR_VALUE);
         Stream<Path> walk;
 
+        // The embedded bundles are a feature intended to preconfigure
+        // the framework to a minimum set of features. After the first
+        // boot, we can safely bypass this. Also we allow for changes
+        // on the embedded bundles after the bootstrap, so we should
+        // respect any configuration done after the first start.
+        // Also, this will cut the startup time a few millisecs :)
+        if (context.getBundles().length > 1)
+        {
+            log.info ("Embedded bundles ready to start");
+            return;
+        }
+
         if (embedded_bundle_url == null)
         {
             log.info ("Embedded {} not found", EMBEDDED_DEPLOY_DIR_VALUE);
