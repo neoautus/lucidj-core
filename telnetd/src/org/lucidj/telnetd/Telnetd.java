@@ -35,7 +35,7 @@ public class Telnetd implements Runnable
     private final static int MAX_CONNECTIONS       = 10;             // SIMULTANEOUS connections
     private final static int WARNING_TIMEOUT       = 5 * 60 * 1000;  // 5 minutes
     private final static int DISCONNECT_TIMEOUT    = 5 * 60 * 1000;  // 5 minutes
-    private final static int HOUSEKEEPING_INTERVAL = 60 * 1000;      // 60 seconds
+    private final static int HOUSEKEEPING_INTERVAL = 1000;           // 1 second
 
     private BundleContext context;
     private Thread accept_thread;
@@ -105,6 +105,19 @@ public class Telnetd implements Runnable
 
     public synchronized void stop ()
     {
+        // Stop housekeeping
+        new Thread ("ConnectionManager asynchronous shutdown")
+        {
+            public void run()
+            {
+                // ConnectionManager blocks for up to HOUSEKEEPING_INTERVAL (default 1 sec)
+                // until complete shutdown. It is not registered as daemon, so it delays
+                // efective jvm shutdown. So we request its shutdown here asynchronously,
+                // this way OSGi can go on with bundle stopping calls.
+                connection_manager.stop ();
+            }
+        }.start ();
+
         // Stop accepting connections
         try
         {
@@ -115,14 +128,11 @@ public class Telnetd implements Runnable
             log.warn ("Exception closing listener socket", e);
         }
 
-        // Stop housekeeping
-        connection_manager.stop ();
-
-        // Stop listener thread, wait at most 10 secs for clean stop
+        // Stop listener thread, wait at most 3 secs for clean stop
         try
         {
             accept_thread.interrupt ();
-            accept_thread.join (10000);
+            accept_thread.join (3000);
         }
         catch (InterruptedException ignore) {};
         log.info ("TelnedD stopped");
