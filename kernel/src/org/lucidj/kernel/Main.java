@@ -278,6 +278,7 @@ public class Main
                             m_fwk.stop();
                             m_fwk.waitForStop(0);
                         }
+                        System.out.println ("Felix shutdown hook finished on " + new Date ());
                     }
                     catch (Exception ex)
                     {
@@ -291,6 +292,7 @@ public class Main
         {
             // Create and init AdminD directory and setup shutdown hook to cleanup
             AdmindUtil.setupAdmindDir (true);
+            AdmindUtil.startKeepAlive ();
         }
         catch (IOException ex)
         {
