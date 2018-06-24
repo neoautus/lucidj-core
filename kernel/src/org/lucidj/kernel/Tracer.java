@@ -22,7 +22,7 @@ import org.osgi.framework.startlevel.FrameworkStartLevel;
 
 import java.io.File;
 
-public class Tracer implements FrameworkListener, BundleListener, ServiceListener
+public class Tracer implements FrameworkListener, SynchronousBundleListener, ServiceListener
 {
     TinyLog log = new TinyLog (new File (System.getProperty ("system.log"), "framework.log"));
 
