@@ -309,6 +309,9 @@ public class Main
             // Initialize the framework, but don't start it yet.
             m_fwk.init();
 
+            // Initialize framework+bundle tracer
+            Tracer.start (m_fwk.getBundleContext ());
+
             // Setup TinyLog on stdout and stderr
             TinyLog log = new TinyLog ();
             System.setOut (log.newLoggingStream (System.out, LogService.LOG_INFO));

@@ -22,10 +22,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -40,6 +37,7 @@ public class TinyLog
 
     private LogService log_service = null;
     private LogService log_service_builtin;
+    private boolean use_only_builtion_log = false;
     private BundleContext context;
     private String logger_name;
 
@@ -58,6 +56,14 @@ public class TinyLog
     public TinyLog (Class logger_clazz)
     {
         this (logger_clazz.getSimpleName ());
+    }
+
+    public TinyLog (File log_file)
+    {
+        // Log to a specific file
+        log_service_builtin = new BuiltinLogService (getConfiguredLogLevel (logger_name),
+                                                     log_file.getAbsolutePath());
+        use_only_builtion_log = true;
     }
 
     public static int getConfiguredLogLevel (String logger_name)
@@ -111,12 +117,18 @@ public class TinyLog
     @SuppressWarnings ("unchecked")
     private LogService get_log_service ()
     {
+        if (use_only_builtion_log)
+        {
+            return (log_service_builtin);
+        }
+
         // Try to obtain a bundle context
         if (context == null)
         {
             Bundle bundle = FrameworkUtil.getBundle (this.getClass ());
             context = bundle == null? null: bundle.getBundleContext ();
         }
+
         // Check, we may not have a context yet
         if (context != null)
         {
@@ -133,6 +145,7 @@ public class TinyLog
                     log_service = null;
                 }
             }
+
             // Try to retrieve a new log service
             if (log_service == null)
             {
@@ -206,6 +219,13 @@ public class TinyLog
         public BuiltinLogService (int log_level)
         {
             this.log_level = log_level;
+        }
+
+        public BuiltinLogService (int log_level, String log_file)
+        {
+            this.log_level = log_level;
+            this.log_file = log_file;
+            this.timestamp_format_info = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss.SSS ");
         }
 
         @Override // LogService
