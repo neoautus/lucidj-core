@@ -189,6 +189,7 @@
         </copy>
 
         <touch file="${stage.dir}/log/system.log" mkdirs="true"/>
+        <touch file="${stage.dir}/log/framework.log" mkdirs="true"/>
 
         <!-- Copy extra config files -->
         <copy todir="${stage.dir}/conf">
