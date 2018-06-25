@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.*;
 import org.apache.felix.framework.util.Util;
 import org.lucidj.ext.admind.AdmindUtil;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.launch.Framework;
@@ -318,6 +319,9 @@ public class Main
             System.setErr (log.newLoggingStream (System.err, LogService.LOG_ERROR));
             System.out.println ("Server booting on " + new Date ());
 
+            // Enable basic sanity check
+            start_sanity_check ();
+
             // Use the system bundle context to process the auto-deploy
             // and auto-install/auto-start properties.
             EmbedProcessor.process(m_fwk.getBundleContext());
@@ -346,6 +350,64 @@ public class Main
             System.exit(0);
         }
     }
+
+    private static void start_sanity_check ()
+    {
+        String system_data = System.getProperty ("system.data", ".");
+        final File system_data_dir = new File (system_data);
+
+        String felix_cache_rootdir = System.getProperty ("felix.cache.rootdir", system_data);
+        final File felix_cache_dir = new File (felix_cache_rootdir, "felix-cache");
+
+        Thread sanity_thread = new Thread ("System Sanity auto-check")
+        {
+            public void run ()
+            {
+                while (!isInterrupted ())
+                {
+                    try
+                    {
+                        String message = null;
+                        Thread.sleep (1000);
+
+                        if (!system_data_dir.exists ())
+                        {
+                            message = "ERROR: System data " + system_data + " missing";
+                        }
+                        else if (!felix_cache_dir.exists ())
+                        {
+                            message = "ERROR: Felix cache " + system_data + " missing";
+                        }
+                        else
+                        {
+                            // All nice and good...
+                            continue;
+                        }
+
+                        // Things got awry -- let's shutdown the framework
+                        if (m_fwk != null)
+                        {
+                            System.err.println (message + " -- WILL SHUTDOWN NOW");
+                            m_fwk.stop ();
+                            break;
+                        }
+                    }
+                    catch (InterruptedException e)
+                    {
+                        // Just ignore
+                    }
+                    catch (BundleException e)
+                    {
+                        System.err.println ("ERROR: Unable to request shutdown due to exception: " + e.toString());
+                        break;
+                    }
+                }
+            }
+        };
+        sanity_thread.setDaemon (true);     // Go down with the ship
+        sanity_thread.start ();
+    }
+
 
     /**
      * Simple method to parse META-INF/services file for framework factory.
