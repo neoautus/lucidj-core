@@ -55,7 +55,7 @@ public class Tracer implements FrameworkListener, SynchronousBundleListener, Ser
             case Bundle.ACTIVE:      return ("ACTIVE");
             case Bundle.UNINSTALLED: return ("UNINSTALLED");
         }
-        return ("Unknown");
+        return ("Bundle:UnknownState[" + state + "]");
     }
 
     private String get_event_string (int type)
@@ -73,7 +73,7 @@ public class Tracer implements FrameworkListener, SynchronousBundleListener, Ser
             case BundleEvent.UNRESOLVED:      return ("UNRESOLVED");
             case BundleEvent.UPDATED:         return ("UPDATED");
         }
-        return ("Unknown");
+        return ("BundleEvent:UnknownType[" + type + "]");
     }
 
     @Override // BundleListener
@@ -108,7 +108,7 @@ public class Tracer implements FrameworkListener, SynchronousBundleListener, Ser
             case FrameworkEvent.WAIT_TIMEDOUT:                  return ("WAIT_TIMEDOUT");
             case FrameworkEvent.WARNING:                        return ("WARNING");
         }
-        return ("Unknown");
+        return ("FrameworkEvent:UnknownType[" + type + "]");
     }
 
     @Override // FrameworkListener
@@ -135,7 +135,36 @@ public class Tracer implements FrameworkListener, SynchronousBundleListener, Ser
             case ServiceEvent.REGISTERED:        return ("REGISTERED");
             case ServiceEvent.UNREGISTERING:     return ("UNREGISTERING");
         }
-        return ("Unknown");
+        return ("ServiceEvent:UnknownType[" + type + "]");
+    }
+
+    private String get_location ()
+    {
+        final StackTraceElement[] stackTrace = new Throwable ().getStackTrace ();
+
+        for (int i = 2 /* skip this+serviceChanged */; i < stackTrace.length; i++)
+        {
+            StackTraceElement ste = stackTrace [i];
+            String class_name = ste.getClassName ();
+
+            if (!class_name.startsWith ("org.apache.felix.framework.")      // Skip framework (todo: add more fws)
+                    && !class_name.equals (this.getClass ().getName ()))    // Skip ourselves
+            {
+                return (ste.toString ());
+            }
+        }
+        return ("StackTraceElement:Unknown");
+    }
+
+    private void log_call_stack (String place)
+    {
+        final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+
+        // TODO: THIS SHOULD BE TRACE LEVEL
+        for (int i = stackTrace.length - 1; i > 0; i--)
+        {
+            log.info ("{} <STACKTRACE>\t{}", place, stackTrace [i].toString());
+        }
     }
 
     @Override // ServiceListener
@@ -146,10 +175,41 @@ public class Tracer implements FrameworkListener, SynchronousBundleListener, Ser
         Bundle bnd = sr.getBundle ();
         long bnd_id = bnd.getBundleId ();
         String bundle = "[" + bnd_id + "] " + bnd.getSymbolicName();
+        String source = get_location ();        // TODO: THIS PROBABLY SHOULD BE DEBUG LEVEL
         Bundle[] using_bundles = sr.getUsingBundles ();
 
-        log.info ("{} <{}> {} {}", bundle, type, sr.toString(), (using_bundles == null)? "": using_bundles);
+        log.info ("{} <{}> {} from {} {}",
+            bundle, type, sr.toString(), source, (using_bundles == null)? "": using_bundles);
+        log_call_stack (bundle);
+
     }
+
+/*
+    private String get_conf_event_string (int type)
+    {
+        switch (type)
+        {
+            case ConfigurationEvent.CM_DELETED:          return ("CM_DELETED");
+            case ConfigurationEvent.CM_LOCATION_CHANGED: return ("CM_LOCATION_CHANGED");
+            case ConfigurationEvent.CM_UPDATED:          return ("CM_UPDATED");
+        }
+        return ("ConfigurationEvent:Unknown");
+    }
+
+    @Override
+    public void configurationEvent(ConfigurationEvent configurationEvent)
+    {
+        String type = get_conf_event_string (configurationEvent.getType ());
+        String fpid = configurationEvent.getFactoryPid ();
+        String pid = configurationEvent.getPid ();
+        ServiceReference ref = configurationEvent.getReference ();
+        Bundle bnd = ref.getBundle ();
+        long bnd_id = bnd.getBundleId ();
+        String bundle = "[" + bnd_id + "] " + bnd.getSymbolicName();
+
+        log.info ("{} <{}> {} / {} {}", bundle, type, fpid, pid, ref);
+    }
+*/
 }
 
 // EOF
