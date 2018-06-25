@@ -335,6 +335,7 @@ public class TinyLog
             // we will try to get it and erase the log level marker.
             for (int i = 1; i < LOG_LEVELS.length; i++)
             {
+                // Form 1: ....] LEVEL ....
                 String level_str = "] " + LOG_LEVELS [i] + " ";
 
                 if (message.contains (level_str))
@@ -344,6 +345,19 @@ public class TinyLog
 
                     // Erase the level string, since it will added later
                     message = message.replace (level_str, "] ");
+                    break;
+                }
+
+                // Form 2: .... LEVEL: ....
+                level_str = LOG_LEVELS[i] + ": ";
+
+                if (message.contains (level_str))
+                {
+                    // We discovered the actual level of the message
+                    level = i;
+
+                    // Erase the level string, since it will added later
+                    message = message.replace (level_str, "");
                     break;
                 }
             }
