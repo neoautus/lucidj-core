@@ -226,8 +226,6 @@ public class Main
         // Self-discovery home and directory structure
         Layouts.processLayouts ();
 
-        // TODO: HANDLE PROPER START WITH/WITHOUT EMBEDDED SHELL (--nointeractive)
-
         if ((args.length > 3) || (expectBundleDir && bundleDir == null))
         {
             System.out.println("Usage: [-b <bundle-deploy-dir>] [<bundle-cache-dir>]");
@@ -236,6 +234,17 @@ public class Main
 
         // Load system properties.
         Main.loadSystemProperties();
+
+        // Avoid java.lang.IllegalStateException: Unable to create a system terminal
+        //       at org.jline.terminal.TerminalBuilder.doBuild(TerminalBuilder.java:273)
+        // Since we don't intend to run as foreground process, there's no reason to
+        // try to init a full terminal on org.apache.felix.gogo.jline activation.
+        if (System.getProperty ("org.jline.terminal.dumb") == null)
+        {
+            // Default org.apache.felix.gogo.jline activation terminal
+            // is always dumb, unless otherwise configured by the user
+            System.setProperty ("org.jline.terminal.dumb", "true");
+        }
 
         // Read configuration properties.
         Map<String, String> configProps = Main.loadConfigProperties();
