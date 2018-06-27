@@ -13,7 +13,6 @@
         <resolvePath id="core/asm">
             <dependency org="org.ow2.asm" name="asm" rev="6.0"/>
             <dependency org="org.ow2.asm" name="asm-commons" rev="6.0"/>
-            <!--dependency org="org.ow2.asm" name="asm-all" rev="5.2"/-->
         </resolvePath>
 
         <resolvePath id="core/aries-spyfly">
@@ -28,39 +27,34 @@
 
         <resolvePath id="core/jetty">
             <!-- Main -->
-            <dependency org="org.eclipse.jetty" name="jetty-server" rev="9.3.22.v20171030" transitive="false"/>
-            <dependency org="org.eclipse.jetty" name="jetty-security" rev="9.3.22.v20171030" transitive="false"/>
-            <dependency org="org.eclipse.jetty" name="jetty-io" rev="9.3.22.v20171030" transitive="false"/>
-            <dependency org="org.eclipse.jetty" name="jetty-jaas" rev="9.3.22.v20171030" transitive="false"/>
-            <dependency org="org.eclipse.jetty" name="jetty-servlet" rev="9.3.22.v20171030" transitive="false"/>
-            <dependency org="org.eclipse.jetty.aggregate" name="jetty-all" rev="9.3.22.v20171030" transitive="false">
-                <artifact name="jetty-all" type="pom" ext="pom"/>
-            </dependency>
-            <dependency org="org.eclipse.jetty" name="jetty-jaas" rev="9.3.22.v20171030" transitive="false"/>
-            <dependency org="org.eclipse.jetty" name="jetty-alpn-server" rev="9.3.22.v20171030" transitive="false"/>
-            <dependency org="org.eclipse.jetty.http2" name="http2-server" rev="9.3.22.v20171030" transitive="false"/>
-            <dependency org="org.eclipse.jetty" name="jetty-xml" rev="9.3.22.v20171030"/>
-            <dependency org="org.eclipse.jetty.http2" name="http2-common" rev="9.3.22.v20171030"/>
-            <dependency org="org.eclipse.jetty.osgi" name="jetty-osgi-alpn" rev="9.3.22.v20171030" transitive="false"/>
+            <dependency org="org.eclipse.jetty" name="jetty-server" rev="9.4.10.v20180503" transitive="false"/>
+            <dependency org="org.eclipse.jetty" name="jetty-security" rev="9.4.10.v20180503" transitive="false"/>
+            <dependency org="org.eclipse.jetty" name="jetty-io" rev="9.4.10.v20180503" transitive="false"/>
+            <dependency org="org.eclipse.jetty" name="jetty-jaas" rev="9.4.10.v20180503" transitive="false"/>
+            <dependency org="org.eclipse.jetty" name="jetty-servlet" rev="9.4.10.v20180503" transitive="false"/>
+            <dependency org="org.eclipse.jetty" name="jetty-jaas" rev="9.4.10.v20180503" transitive="false"/>
+            <dependency org="org.eclipse.jetty" name="jetty-alpn-server" rev="9.4.10.v20180503" transitive="false"/>
+            <dependency org="org.eclipse.jetty.http2" name="http2-server" rev="9.4.10.v20180503" transitive="false"/>
+            <dependency org="org.eclipse.jetty" name="jetty-xml" rev="9.4.10.v20180503"/>
+            <dependency org="org.eclipse.jetty.http2" name="http2-common" rev="9.4.10.v20180503"/>
+            <dependency org="org.eclipse.jetty.osgi" name="jetty-osgi-alpn" rev="9.4.10.v20180503" transitive="false"/>
             <dependency org="org.mortbay.jetty.alpn" name="alpn-boot" rev="8.1.2.v20141202" transitive="false"/>
-            <dependency org="org.eclipse.jetty" name="jetty-continuation" rev="9.3.22.v20171030" transitive="false"/>
+            <dependency org="org.eclipse.jetty" name="jetty-continuation" rev="9.4.10.v20180503" transitive="false"/>
+            <dependency org="org.eclipse.jetty" name="jetty-jmx" rev="9.4.10.v20180503" transitive="false"/>
             <!-- Dependencies -->
             <dependency org="javax.servlet" name="javax.servlet-api" rev="3.1.0"/>
         </resolvePath>
 
         <resolvePath id="core/pax-web">
             <!-- Main -->
-            <dependency org="org.ops4j.pax.web" name="pax-web-api" rev="6.1.2" transitive="false"/>
-            <dependency org="org.ops4j.pax.web" name="pax-web-jetty" rev="6.1.2" transitive="false"/>
-            <dependency org="org.ops4j.pax.web" name="pax-web-runtime" rev="6.1.2" transitive="false"/>
-            <dependency org="org.ops4j.pax.web" name="pax-web-spi" rev="6.1.2" transitive="false"/>
+            <dependency org="org.ops4j.pax.web" name="pax-web-api" rev="7.1.1" transitive="false"/>
+            <dependency org="org.ops4j.pax.web" name="pax-web-jetty" rev="7.1.1" transitive="false"/>
+            <dependency org="org.ops4j.pax.web" name="pax-web-runtime" rev="7.1.1" transitive="false"/>
+            <dependency org="org.ops4j.pax.web" name="pax-web-spi" rev="7.1.1" transitive="false"/>
             <!-- Dependencies -->
             <dependency org="org.apache.xbean" name="xbean-finder" rev="4.6" transitive="false"/>
             <dependency org="org.apache.xbean" name="xbean-reflect" rev="4.6" transitive="false"/>
             <dependency org="org.apache.xbean" name="xbean-bundleutils" rev="4.6" transitive="false"/>
-            <dependency org="org.ow2.asm" name="asm" rev="6.0"/>
-            <dependency org="org.ow2.asm" name="asm-commons" rev="6.0"/>
-            <!-- + org.ow2.asm/asm/6.0 -->
         </resolvePath>
 
         <resolvePath id="core/jolokia">
@@ -75,7 +69,8 @@
             <dependency org="org.apache.felix" name="org.apache.felix.webconsole.plugins.obr" rev="1.0.4" transitive="false"/>
             <dependency org="org.apache.felix" name="org.apache.felix.webconsole.plugins.packageadmin" rev="1.0.4" transitive="false"/>
             <dependency org="org.apache.felix" name="org.apache.felix.ipojo.webconsole" rev="1.7.0" transitive="false"/>
-            <dependency org="org.apache.karaf.webconsole" name="org.apache.karaf.webconsole.http" rev="4.1.5" transitive="false"/>
+            <dependency org="org.apache.karaf.webconsole" name="org.apache.karaf.webconsole.http" rev="4.2.0" transitive="false"/>
+            <dependency org="org.apache.karaf.http" name="org.apache.karaf.http.core" rev="4.2.0" transitive="false"/>
             <!-- Dependencies -->
             <dependency org="org.apache.felix" name="org.apache.felix.inventory" rev="1.0.0" transitive="false"/>
             <dependency org="commons-fileupload" name="commons-fileupload" rev="1.2.1" transitive="false"/>
@@ -177,6 +172,7 @@
         </copy>
 
         <copy todir="${preload.bundles.dir}/11-deploy-http" flatten="true">
+            <path refid="core/asm"/>
             <path refid="core/pax-web"/>
         </copy>
 
