@@ -164,6 +164,10 @@
             </mappedresources>
         </jar>
 
+        <jar destfile="${bundle.dist.jar}" update="true">
+            <fileset dir="${artifacts.dir}" includes="commands/*.jar"/>
+        </jar>
+
         <artifact file="${bundle.dist.jar}" group="kernel"/>
 
     </target>
