@@ -6,8 +6,6 @@
         <fileset dir="${basedir}/../.." includes="configure.xml"/>
     </import>
 
-    <property name="main.class" value="org.lucidj.kernel.Main"/>
-
     <target name="getlibs" depends="configure.getlibs">
 
         <resolvePath id="core/asm">
@@ -143,9 +141,6 @@
         <!-- Store the deployment location we should use -->
         <property name="deploy.dir" value="${stage.dir}/deploy"/>
         <mkdir dir="${deploy.dir}"/>
-        <propertyfile file="${stage.dir}/deploy.properties">
-            <entry key="deploy.dir" value="${deploy.dir}"/>
-        </propertyfile>
 
         <!-- No -x anywhere -->
         <chmod perm="uog-x">
@@ -194,9 +189,6 @@
 
         <!-- Create data/ directory -->
         <mkdir dir="${stage.dir}/data"/>
-
-        <!-- Remove docs dir -->
-        <delete dir="${stage.dir}/doc"/>
 
         <!-- Make /bin/* +x since we get Felix from .zip -->
         <chmod perm="ug+rx">
