@@ -38,6 +38,13 @@
             <dependency org="org.ops4j.pax.logging" name="pax-logging-api" rev="1.10.1" transitive="false"/>
         </resolvePath>
 
+        <getDependency group="telnetd/admind"
+            org="org.lucidj.admind" name="org.lucidj.api.admind" rev="1.0.0"/>
+
+        <path id="telnetd/admind">
+            <fileset dir="${libcache.dir}" includes="telnetd/admind/**/*.jar"/>
+        </path>
+
     </target>
 
     <target name="build-module" depends="init">
@@ -49,6 +56,7 @@
             <classpaths>
                 <path refid="telnetd/libs"/>
                 <path refid="telnetd/logging"/>
+                <path refid="telnetd/admind"/>
             </classpaths>
         </build.bundle>
 

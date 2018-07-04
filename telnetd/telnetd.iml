@@ -30,5 +30,15 @@
         <jarDirectory url="file://$MODULE_DIR$/../cache/lib/telnetd/logging/bundle" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="module-library" scope="PROVIDED">
+      <library name="AdminD API">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/../cache/lib/telnetd/admind" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/../cache/lib/telnetd/admind" recursive="false" />
+      </library>
+    </orderEntry>
   </component>
 </module>
