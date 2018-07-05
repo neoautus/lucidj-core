@@ -44,11 +44,18 @@ public class TelnetdActivator implements TaskProvider, BundleActivator
         throws Exception
     {
         context = bundleContext;
-        telnetd = new Telnetd (context);
 
-        if (!telnetd.start ())
+        // TODO: ALLOW TO ACTUALLY DEFINE TELNET PORT, INSTEAD OF JUST ON/OFF SWITCH
+        if (context.getProperty ("osgi.shell.telnet.port") != null)
         {
-            telnetd = null;
+            // Create our micro-telnet server...
+            telnetd = new Telnetd (context);
+
+            // ...and start it
+            if (!telnetd.start ())
+            {
+                telnetd = null;
+            }
         }
 
         // Register this class as TaskProvider for 'shell'
