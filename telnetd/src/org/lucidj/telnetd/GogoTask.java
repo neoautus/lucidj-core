@@ -129,7 +129,8 @@ class GogoTask implements Task, Shell.Context
 
     private int filter_terminfo_sequences (int ch)
     {
-        log.info ("filter: {} {} -> {}", ch, Integer.toHexString(ch), (char)ch);
+        log.debug ("filter: {} {} -> {}", ch, Integer.toHexString(ch), (char)ch);
+
         if (ch >= 0xf0 && ch <= 0xff)
         {
             if (terminfo_buf != null)
@@ -168,17 +169,23 @@ class GogoTask implements Task, Shell.Context
             {
                 try
                 {
-                    int ch;
+                    int ch = -1;
 
-                    // Do NOT run into EOF and filter out terminfo sequences
-                    while (in.available() == 0
-                           || (ch = filter_terminfo_sequences (in.read () & 0xff)) == -1)
+                    while (ch == -1)
                     {
-                        try
+                        // Do NOT run into EOF and filter out terminfo sequences
+                        if (in.available() == 0)
                         {
-                            Thread.sleep (20);
+                            try
+                            {
+                                Thread.sleep (20);
+                            }
+                            catch (InterruptedException ignore) {};
                         }
-                        catch (InterruptedException e) {};
+                        else // We have available chars to read
+                        {
+                            ch = filter_terminfo_sequences (in.read () & 0xff);
+                        }
                     }
                     return (ch);
                 }
