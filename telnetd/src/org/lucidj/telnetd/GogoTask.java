@@ -129,7 +129,7 @@ class GogoTask implements Task, Shell.Context
 
     private int filter_terminfo_sequences (int ch)
     {
-        log.info ("filter: {} {} -> {}", ch, Integer.toHexString(ch), new Character((char)ch));
+        log.info ("filter: {} {} -> {}", ch, Integer.toHexString(ch), (char)ch);
         if (ch >= 0xf0 && ch <= 0xff)
         {
             if (terminfo_buf != null)
@@ -166,19 +166,27 @@ class GogoTask implements Task, Shell.Context
             public int read ()
                 throws IOException
             {
-                int ch;
-
-                // Do NOT run into EOF and filter out terminfo sequences
-                while (in.available() == 0
-                       || (ch = filter_terminfo_sequences (in.read () & 0xff)) == -1)
+                try
                 {
-                    try
+                    int ch;
+
+                    // Do NOT run into EOF and filter out terminfo sequences
+                    while (in.available() == 0
+                           || (ch = filter_terminfo_sequences (in.read () & 0xff)) == -1)
                     {
-                        Thread.sleep (20);
+                        try
+                        {
+                            Thread.sleep (20);
+                        }
+                        catch (InterruptedException e) {};
                     }
-                    catch (InterruptedException e) {};
+                    return (ch);
                 }
-                return (ch);
+                catch (IOException e)
+                {
+                    // We assume the connection has closed
+                    return (-1);
+                }
             }
         };
 
@@ -195,9 +203,11 @@ class GogoTask implements Task, Shell.Context
 
         // Enter the shell
         run_gosh (terminal);
+
+        log.info ("Connection closed");
+        soft_in.close ();
         return (true);
     }
-
 
     @Override // Shell.Context
     public String getProperty (String s)
