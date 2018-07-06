@@ -33,11 +33,11 @@
             <!-- These are the base bundles distributed with Felix 5.6.10 -->
             <!--dependency org="org.fusesource.jansi" name="jansi" rev="1.16" transitive="false"/-->
             <!-- ^^ jansi is not needed since we have JNA -->
-            <dependency org="org.jline" name="jline" rev="3.5.1" transitive="false"/>
+            <dependency org="org.jline" name="jline" rev="3.8.0" transitive="false"/>
             <dependency org="org.apache.felix" name="org.apache.felix.bundlerepository" rev="2.0.10" transitive="false"/>
             <dependency org="org.apache.felix" name="org.apache.felix.gogo.command" rev="1.0.2" transitive="false"/>
-            <dependency org="org.apache.felix" name="org.apache.felix.gogo.jline" rev="1.0.10" transitive="false"/>
-            <dependency org="org.apache.felix" name="org.apache.felix.gogo.runtime" rev="1.0.10" transitive="false"/>
+            <dependency org="org.apache.felix" name="org.apache.felix.gogo.jline" rev="1.1.0" transitive="false"/>
+            <dependency org="org.apache.felix" name="org.apache.felix.gogo.runtime" rev="1.1.0" transitive="false"/>
         </resolvePath>
 
         <resolvePath id="kernel/jna">
