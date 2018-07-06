@@ -16,6 +16,7 @@
 
 package org.lucidj.kernel;
 
+import org.lucidj.kernel.shared.TinyLog;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;

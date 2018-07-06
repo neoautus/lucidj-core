@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.lucidj.kernel;
+package org.lucidj.kernel.shared;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;

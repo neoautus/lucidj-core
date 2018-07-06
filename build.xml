@@ -3,6 +3,11 @@
 
     <import file="configure.xml"/>
 
+    <target name="build-shared">
+        <!-- Utility classes from Kernel that can be shared with other modules -->
+        <subant buildpath="${basedir}/shared"/>
+    </target>
+
     <target name="build-kernel">
         <subant buildpath="${basedir}/kernel"/>
     </target>
@@ -12,6 +17,7 @@
     </target>
 
     <target name="build-all">
+        <antcall target="build-shared"/>
         <iterate target="build-module"/>
         <antcall target="build-kernel"/>
     </target>

@@ -27,5 +27,6 @@
         <jarDirectory url="file://$MODULE_DIR$/../cache/lib/project-embedded" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="library" scope="PROVIDED" name="Shared Kernel Classes" level="project" />
   </component>
 </module>

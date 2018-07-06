@@ -48,9 +48,6 @@
                 <path refid="project-libs"/>
                 <path refid="admin-util"/>
             </classpaths>
-            <addjar>
-                <zipgroupfileset dir="${libcache.dir}" includes="admin-util/**/*.jar"/>
-            </addjar>
         </build.classic.jar>
 
         <artifact file="${dist.jar}" group="commands"/>

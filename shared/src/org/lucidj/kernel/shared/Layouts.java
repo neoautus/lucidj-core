@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.lucidj.kernel;
+package org.lucidj.kernel.shared;
 
 import java.io.*;
 import java.net.URI;
@@ -61,7 +61,7 @@ public class Layouts
         //--------------------------------------------------------------------
         if (is == null)
         {
-            URL prop_url = Main.class.getClassLoader ().getResource (DEFAULT_LAYOUTS_FILE);
+            URL prop_url = Layouts.class.getClassLoader ().getResource (DEFAULT_LAYOUTS_FILE);
 
             if (prop_url != null)
             {
@@ -133,7 +133,7 @@ public class Layouts
 
         try
         {
-            jar_uri = Main.class.getProtectionDomain ().getCodeSource ().getLocation ().toURI ();
+            jar_uri = Layouts.class.getProtectionDomain ().getCodeSource ().getLocation ().toURI ();
         }
         catch (URISyntaxException e)
         {

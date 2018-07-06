@@ -24,6 +24,8 @@ import java.net.URL;
 import java.util.*;
 import org.apache.felix.framework.util.Util;
 import org.lucidj.ext.admind.AdmindUtil;
+import org.lucidj.kernel.shared.Layouts;
+import org.lucidj.kernel.shared.TinyLog;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;

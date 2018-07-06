@@ -16,6 +16,7 @@
 
 package org.lucidj.kernel;
 
+import org.lucidj.kernel.shared.TinyLog;
 import org.osgi.framework.*;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
