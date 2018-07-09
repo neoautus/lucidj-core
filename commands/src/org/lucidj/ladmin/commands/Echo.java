@@ -43,11 +43,16 @@ public class Echo
         String params = (args.length == 0)? "Hello world!": String.join (" ", args);
 
         String request = AdmindUtil.asyncInvoke ("echo", params);
+        int status = AdmindUtil.asyncWait (request);
 
-        if (AdmindUtil.asyncWait (request))
+        if (status == AdmindUtil.ASYNC_READY)
         {
             String response = AdmindUtil.asyncResponse (request);
             System.out.println ("Echo '" + def_server_name + "': " + response.trim ());
+        }
+        else if (status == AdmindUtil.ASYNC_GONE)
+        {
+            System.out.println ("Server '" + def_server_name + "' is gone");
         }
         else
         {
