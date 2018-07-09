@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/bootstrap/bootstrap.iml" filepath="$PROJECT_DIR$/bootstrap/bootstrap.iml" />
       <module fileurl="file://$PROJECT_DIR$/commands/commands.iml" filepath="$PROJECT_DIR$/commands/commands.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jmxspyd/jmxspyd.iml" filepath="$PROJECT_DIR$/jmxspyd/jmxspyd.iml" />
       <module fileurl="file://$PROJECT_DIR$/kernel/kernel.iml" filepath="$PROJECT_DIR$/kernel/kernel.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/lucidj-core.iml" filepath="$PROJECT_DIR$/.idea/lucidj-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/shared/shared.iml" filepath="$PROJECT_DIR$/shared/shared.iml" />

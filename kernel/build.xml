@@ -90,7 +90,6 @@
         <resolvePath id="kernel/aries-jmx">
             <dependency org="org.apache.aries.jmx" name="org.apache.aries.jmx" rev="1.1.5" transitive="false"/>
             <dependency org="org.apache.aries" name="org.apache.aries.util" rev="1.1.1" transitive="false"/>
-            <dependency org="org.everit.osgi.jmx" name="org.everit.osgi.jmx.activator" rev="1.0.0" transitive="false"/>
         </resolvePath>
 
         <getDependency group="project-libs"
