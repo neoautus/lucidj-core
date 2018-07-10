@@ -23,7 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import org.apache.felix.framework.util.Util;
-import org.lucidj.ext.admind.AdmindUtil;
+import org.lucidj.admind.shared.AdmindUtil;
 import org.lucidj.kernel.shared.Layouts;
 import org.lucidj.kernel.shared.TinyLog;
 import org.osgi.framework.BundleException;

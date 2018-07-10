@@ -16,7 +16,7 @@
 
 package org.lucidj.ladmin.commands;
 
-import org.lucidj.ext.admind.AdmindUtil;
+import org.lucidj.admind.shared.AdmindUtil;
 
 public class Echo
 {
