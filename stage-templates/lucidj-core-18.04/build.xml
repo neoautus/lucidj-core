@@ -124,7 +124,7 @@
         </resolvePath>
 
         <getDependency group="project-embedded"
-            org="org.lucidj.ladmin" name="lucidj-ladmin" rev="1.0-rc2" type="zip"/>
+            org="org.lucidj.ladmin" name="lucidj-ladmin" rev="1.0-rc3" type="zip"/>
 
     </target>
 
