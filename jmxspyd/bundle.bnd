@@ -1,4 +1,4 @@
-Bundle-Name: LucidJ JmxSpy JMX Daemon
+Bundle-Name: LucidJ JMXSpy Daemon
 Bundle-SymbolicName: org.lucidj.jmxspyd
 Bundle-Version: 1.0.0
 Bundle-Vendor: NEOautus Ltd

@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServer;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
@@ -47,8 +48,9 @@ class JmxSpyd implements TaskProvider
 
     @Override // TaskProvider
     public Task createTask (InputStream in, OutputStream out, OutputStream err, String locator, String... options)
+        throws IOException
     {
-        return (new JmxSpyTask (context, in, out, err, locator, options));
+        return (new JmxSpyTask (context, mbean_server, in, out, err, locator, options));
     }
 
     public boolean start ()
