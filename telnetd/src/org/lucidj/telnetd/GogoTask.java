@@ -106,7 +106,7 @@ class GogoTask implements Task, Shell.Context
         {
             case TERMINFO_TYPE:
             {
-                log.info ("Terminal type: {}", value);
+                log.debug ("Terminal type: {}", value);
                 terminfo_type = value;
                 break;
             }
@@ -115,7 +115,7 @@ class GogoTask implements Task, Shell.Context
                 String[] args = value.split (";");
                 terminfo_width = Integer.parseInt (args [0]);
                 terminfo_height = Integer.parseInt (args [1]);
-                log.info ("Terminal size: {} x {}", terminfo_width, terminfo_height);
+                log.debug ("Terminal size: {} x {}", terminfo_width, terminfo_height);
 
                 if (terminal != null)
                 {
@@ -211,7 +211,7 @@ class GogoTask implements Task, Shell.Context
         // Enter the shell
         run_gosh (terminal);
 
-        log.info ("Connection closed");
+        log.debug ("Connection closed");
         soft_in.close ();
         return (true);
     }
