@@ -99,16 +99,16 @@
         <getDependency group="project-libs"
             org="org.lucidj.artifactdeployer" name="org.lucidj.artdeployer" rev="1.3.0"/>
         <getDependency group="project-libs"
-            org="org.lucidj.admind" name="org.lucidj.admind.core" rev="1.0.0"/>
+            org="org.lucidj.admind" name="org.lucidj.admind.core" rev="1.1.0"/>
         <getDependency group="project-libs"
-            org="org.lucidj.admind" name="org.lucidj.api.admind" rev="1.0.0"/>
+            org="org.lucidj.admind" name="org.lucidj.api.admind" rev="1.1.0"/>
 
         <path id="project-libs">
             <fileset dir="${libcache.dir}" includes="project-libs/**/*.jar"/>
         </path>
 
         <getDependency group="project-embedded"
-            org="org.lucidj.admind" name="org.lucidj.admind.adminutil" rev="1.0.0"/>
+            org="org.lucidj.admind" name="org.lucidj.admind.adminutil" rev="1.1.0"/>
 
         <path id="project-embedded">
             <fileset dir="${libcache.dir}" includes="project-embedded/**/*.jar"/>

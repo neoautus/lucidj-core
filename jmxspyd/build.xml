@@ -28,7 +28,7 @@
         </resolvePath>
 
         <getDependency group="jmxspyd/admind" outfileProperty="admind.jar"
-            org="org.lucidj.admind" name="org.lucidj.api.admind" rev="1.0.0"/>
+            org="org.lucidj.admind" name="org.lucidj.api.admind" rev="1.1.0"/>
         <path id="jmxspyd/admind" location="${admind.jar}"/>
 
     </target>

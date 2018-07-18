@@ -39,7 +39,7 @@
         </resolvePath>
 
         <getDependency group="telnetd/admind"
-            org="org.lucidj.admind" name="org.lucidj.api.admind" rev="1.0.0"/>
+            org="org.lucidj.admind" name="org.lucidj.api.admind" rev="1.1.0"/>
 
         <path id="telnetd/admind">
             <fileset dir="${libcache.dir}" includes="telnetd/admind/**/*.jar"/>
